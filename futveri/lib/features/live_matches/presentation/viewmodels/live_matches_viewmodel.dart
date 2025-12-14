@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../domain/entities/match_entity.dart';
+import '../../domain/usecases/get_live_matches_usecase.dart';
 import '../providers/live_matches_providers.dart';
 
 /// Live matches state

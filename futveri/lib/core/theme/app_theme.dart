@@ -30,12 +30,13 @@ class AppTheme {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
+
       textTheme: _buildTextTheme(Brightness.light),
     );
   }
@@ -58,13 +59,14 @@ class AppTheme {
         backgroundColor: darkBackground,
         foregroundColor: textPrimary,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: darkCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
+
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: darkSurface,
         selectedItemColor: primaryGreen,

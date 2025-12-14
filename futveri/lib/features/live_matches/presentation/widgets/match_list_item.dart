@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/match_entity.dart';
-import '../../domain/entities/match_event_entity.dart';
 
 /// Match list item widget
 class MatchListItem extends StatelessWidget {

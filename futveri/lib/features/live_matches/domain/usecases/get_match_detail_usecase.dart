@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/match_entity.dart';
 import '../entities/match_event_entity.dart';
