@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../domain/entities/player_entity.dart';
-import '../../../domain/entities/position.dart';
+import '../../domain/entities/player_entity.dart';
+import '../../domain/entities/position.dart';
 
 /// FIFA-style player card widget
 class PlayerCardWidget extends StatelessWidget {

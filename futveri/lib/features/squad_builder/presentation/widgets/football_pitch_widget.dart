@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entities/formation_entity.dart';
-import '../../../domain/entities/player_entity.dart';
-import '../../../domain/entities/position.dart';
+import '../../domain/entities/formation_entity.dart';
+import '../../domain/entities/player_entity.dart';
+import '../../domain/entities/position.dart';
 import '../viewmodels/squad_builder_viewmodel.dart';
 import 'player_card_widget.dart';
 

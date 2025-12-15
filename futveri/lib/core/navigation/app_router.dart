@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/live_matches/presentation/screens/live_matches_screen.dart';
 import '../../features/live_matches/presentation/screens/match_detail_screen.dart';
+import '../../features/squad_builder/presentation/screens/squad_builder_screen.dart';
 
 /// Routes
 class AppRoutes {
@@ -11,6 +12,7 @@ class AppRoutes {
   static const String leagues = '/leagues';
   static const String search = '/search';
   static const String simulation = '/simulation';
+  static const String squadBuilder = '/squad-builder';
   static const String profile = '/profile';
 }
 
@@ -42,7 +44,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.simulation,
-        builder: (context, state) => const _PlaceholderScreen(title: 'Simulation'),
+        builder: (context, state) => const SquadBuilderScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.squadBuilder,
+        builder: (context, state) => const SquadBuilderScreen(),
       ),
       GoRoute(
         path: AppRoutes.profile,

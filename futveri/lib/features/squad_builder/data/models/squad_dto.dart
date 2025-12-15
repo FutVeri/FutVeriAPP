@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/squad_entity.dart';
 import '../../domain/entities/formation_entity.dart';
 import '../../domain/entities/position.dart';
+import '../../domain/entities/player_entity.dart';
 import 'player_dto.dart';
 
 part 'squad_dto.g.dart';
