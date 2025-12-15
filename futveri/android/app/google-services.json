@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "471894032716",
+    "project_id": "futveri",
+    "storage_bucket": "futveri.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471894032716:android:93ccdf6e59d0c2ee5a8fe9",
+        "android_client_info": {
+          "package_name": "com.example.futveri"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_SRaCE23Sl7A5MsyfS4eLqxwkar3eXHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
