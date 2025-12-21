@@ -38,6 +38,8 @@ abstract class ScoutReport with _$ScoutReport {
     // Meta
     required String scoutId,
     required DateTime createdAt,
+    required String description,
+    required List<String> imageUrls,
     @Default('draft') String status, // draft, submitted, approved
   }) = _ScoutReport;
 

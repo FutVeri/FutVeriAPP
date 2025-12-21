@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:futveri/features/scout/presentation/pages/create_report_page.dart';
 import 'package:futveri/features/scout/presentation/pages/report_detail_page.dart';
 import 'package:futveri/features/social/presentation/pages/social_feed_page.dart';
+import 'package:futveri/features/social/presentation/pages/post_detail_page.dart';
 import 'package:futveri/features/scout/presentation/pages/scout_dashboard_page.dart';
 import 'package:futveri/features/simulation/presentation/pages/simulation_page.dart';
 import 'package:futveri/features/profile/presentation/pages/profile_page.dart';
@@ -77,6 +78,14 @@ final router = GoRouter(
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return ReportDetailPage(reportId: id);
+      },
+    ),
+    GoRoute(
+      path: '/post-detail/:id',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        return PostDetailPage(postId: id);
       },
     ),
   ],

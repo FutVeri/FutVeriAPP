@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:futveri/core/theme/app_theme.dart';
 
 class FeedPostWidget extends StatelessWidget {
+  final String postId;
   final String scoutName;
   final String playerName;
   final String playerInfo;
@@ -14,6 +16,7 @@ class FeedPostWidget extends StatelessWidget {
 
   const FeedPostWidget({
     super.key,
+    this.postId = '1',
     required this.scoutName,
     required this.playerName,
     required this.playerInfo,
@@ -24,7 +27,9 @@ class FeedPostWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => context.push('/post-detail/$postId'),
+      child: Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -154,6 +159,7 @@ class FeedPostWidget extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 

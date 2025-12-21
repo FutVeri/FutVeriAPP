@@ -21,7 +21,7 @@ mixin _$ScoutReport {
  Map<String, int> get ratings;// Analysis
  String get physicalAttributes; String get technicalAttributes; String get tacticalAttributes; String get metalAttributes;// SWOT
  String get strengths; String get weaknesses; String get risks; String get recommendedRole;// Meta
- String get scoutId; DateTime get createdAt; String get status;
+ String get scoutId; DateTime get createdAt; String get description; List<String> get imageUrls; String get status;
 /// Create a copy of ScoutReport
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -34,16 +34,16 @@ $ScoutReportCopyWith<ScoutReport> get copyWith => _$ScoutReportCopyWithImpl<Scou
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScoutReport&&(identical(other.id, id) || other.id == id)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.playerName, playerName) || other.playerName == playerName)&&(identical(other.playerPosition, playerPosition) || other.playerPosition == playerPosition)&&(identical(other.playerAge, playerAge) || other.playerAge == playerAge)&&(identical(other.playerTeam, playerTeam) || other.playerTeam == playerTeam)&&(identical(other.matchDate, matchDate) || other.matchDate == matchDate)&&(identical(other.rivalTeam, rivalTeam) || other.rivalTeam == rivalTeam)&&(identical(other.score, score) || other.score == score)&&(identical(other.minutePlayed, minutePlayed) || other.minutePlayed == minutePlayed)&&(identical(other.matchType, matchType) || other.matchType == matchType)&&const DeepCollectionEquality().equals(other.ratings, ratings)&&(identical(other.physicalAttributes, physicalAttributes) || other.physicalAttributes == physicalAttributes)&&(identical(other.technicalAttributes, technicalAttributes) || other.technicalAttributes == technicalAttributes)&&(identical(other.tacticalAttributes, tacticalAttributes) || other.tacticalAttributes == tacticalAttributes)&&(identical(other.metalAttributes, metalAttributes) || other.metalAttributes == metalAttributes)&&(identical(other.strengths, strengths) || other.strengths == strengths)&&(identical(other.weaknesses, weaknesses) || other.weaknesses == weaknesses)&&(identical(other.risks, risks) || other.risks == risks)&&(identical(other.recommendedRole, recommendedRole) || other.recommendedRole == recommendedRole)&&(identical(other.scoutId, scoutId) || other.scoutId == scoutId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScoutReport&&(identical(other.id, id) || other.id == id)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.playerName, playerName) || other.playerName == playerName)&&(identical(other.playerPosition, playerPosition) || other.playerPosition == playerPosition)&&(identical(other.playerAge, playerAge) || other.playerAge == playerAge)&&(identical(other.playerTeam, playerTeam) || other.playerTeam == playerTeam)&&(identical(other.matchDate, matchDate) || other.matchDate == matchDate)&&(identical(other.rivalTeam, rivalTeam) || other.rivalTeam == rivalTeam)&&(identical(other.score, score) || other.score == score)&&(identical(other.minutePlayed, minutePlayed) || other.minutePlayed == minutePlayed)&&(identical(other.matchType, matchType) || other.matchType == matchType)&&const DeepCollectionEquality().equals(other.ratings, ratings)&&(identical(other.physicalAttributes, physicalAttributes) || other.physicalAttributes == physicalAttributes)&&(identical(other.technicalAttributes, technicalAttributes) || other.technicalAttributes == technicalAttributes)&&(identical(other.tacticalAttributes, tacticalAttributes) || other.tacticalAttributes == tacticalAttributes)&&(identical(other.metalAttributes, metalAttributes) || other.metalAttributes == metalAttributes)&&(identical(other.strengths, strengths) || other.strengths == strengths)&&(identical(other.weaknesses, weaknesses) || other.weaknesses == weaknesses)&&(identical(other.risks, risks) || other.risks == risks)&&(identical(other.recommendedRole, recommendedRole) || other.recommendedRole == recommendedRole)&&(identical(other.scoutId, scoutId) || other.scoutId == scoutId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.imageUrls, imageUrls)&&(identical(other.status, status) || other.status == status));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,playerId,playerName,playerPosition,playerAge,playerTeam,matchDate,rivalTeam,score,minutePlayed,matchType,const DeepCollectionEquality().hash(ratings),physicalAttributes,technicalAttributes,tacticalAttributes,metalAttributes,strengths,weaknesses,risks,recommendedRole,scoutId,createdAt,status]);
+int get hashCode => Object.hashAll([runtimeType,id,playerId,playerName,playerPosition,playerAge,playerTeam,matchDate,rivalTeam,score,minutePlayed,matchType,const DeepCollectionEquality().hash(ratings),physicalAttributes,technicalAttributes,tacticalAttributes,metalAttributes,strengths,weaknesses,risks,recommendedRole,scoutId,createdAt,description,const DeepCollectionEquality().hash(imageUrls),status]);
 
 @override
 String toString() {
-  return 'ScoutReport(id: $id, playerId: $playerId, playerName: $playerName, playerPosition: $playerPosition, playerAge: $playerAge, playerTeam: $playerTeam, matchDate: $matchDate, rivalTeam: $rivalTeam, score: $score, minutePlayed: $minutePlayed, matchType: $matchType, ratings: $ratings, physicalAttributes: $physicalAttributes, technicalAttributes: $technicalAttributes, tacticalAttributes: $tacticalAttributes, metalAttributes: $metalAttributes, strengths: $strengths, weaknesses: $weaknesses, risks: $risks, recommendedRole: $recommendedRole, scoutId: $scoutId, createdAt: $createdAt, status: $status)';
+  return 'ScoutReport(id: $id, playerId: $playerId, playerName: $playerName, playerPosition: $playerPosition, playerAge: $playerAge, playerTeam: $playerTeam, matchDate: $matchDate, rivalTeam: $rivalTeam, score: $score, minutePlayed: $minutePlayed, matchType: $matchType, ratings: $ratings, physicalAttributes: $physicalAttributes, technicalAttributes: $technicalAttributes, tacticalAttributes: $tacticalAttributes, metalAttributes: $metalAttributes, strengths: $strengths, weaknesses: $weaknesses, risks: $risks, recommendedRole: $recommendedRole, scoutId: $scoutId, createdAt: $createdAt, description: $description, imageUrls: $imageUrls, status: $status)';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $ScoutReportCopyWith<$Res>  {
   factory $ScoutReportCopyWith(ScoutReport value, $Res Function(ScoutReport) _then) = _$ScoutReportCopyWithImpl;
 @useResult
 $Res call({
- String id, String playerId, String playerName, String playerPosition, int playerAge, String playerTeam, DateTime matchDate, String rivalTeam, String score, int minutePlayed, String matchType, Map<String, int> ratings, String physicalAttributes, String technicalAttributes, String tacticalAttributes, String metalAttributes, String strengths, String weaknesses, String risks, String recommendedRole, String scoutId, DateTime createdAt, String status
+ String id, String playerId, String playerName, String playerPosition, int playerAge, String playerTeam, DateTime matchDate, String rivalTeam, String score, int minutePlayed, String matchType, Map<String, int> ratings, String physicalAttributes, String technicalAttributes, String tacticalAttributes, String metalAttributes, String strengths, String weaknesses, String risks, String recommendedRole, String scoutId, DateTime createdAt, String description, List<String> imageUrls, String status
 });
 
 
@@ -71,7 +71,7 @@ class _$ScoutReportCopyWithImpl<$Res>
 
 /// Create a copy of ScoutReport
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? playerId = null,Object? playerName = null,Object? playerPosition = null,Object? playerAge = null,Object? playerTeam = null,Object? matchDate = null,Object? rivalTeam = null,Object? score = null,Object? minutePlayed = null,Object? matchType = null,Object? ratings = null,Object? physicalAttributes = null,Object? technicalAttributes = null,Object? tacticalAttributes = null,Object? metalAttributes = null,Object? strengths = null,Object? weaknesses = null,Object? risks = null,Object? recommendedRole = null,Object? scoutId = null,Object? createdAt = null,Object? status = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? playerId = null,Object? playerName = null,Object? playerPosition = null,Object? playerAge = null,Object? playerTeam = null,Object? matchDate = null,Object? rivalTeam = null,Object? score = null,Object? minutePlayed = null,Object? matchType = null,Object? ratings = null,Object? physicalAttributes = null,Object? technicalAttributes = null,Object? tacticalAttributes = null,Object? metalAttributes = null,Object? strengths = null,Object? weaknesses = null,Object? risks = null,Object? recommendedRole = null,Object? scoutId = null,Object? createdAt = null,Object? description = null,Object? imageUrls = null,Object? status = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
@@ -95,7 +95,9 @@ as String,risks: null == risks ? _self.risks : risks // ignore: cast_nullable_to
 as String,recommendedRole: null == recommendedRole ? _self.recommendedRole : recommendedRole // ignore: cast_nullable_to_non_nullable
 as String,scoutId: null == scoutId ? _self.scoutId : scoutId // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as DateTime,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,imageUrls: null == imageUrls ? _self.imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
+as List<String>,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -181,10 +183,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String playerId,  String playerName,  String playerPosition,  int playerAge,  String playerTeam,  DateTime matchDate,  String rivalTeam,  String score,  int minutePlayed,  String matchType,  Map<String, int> ratings,  String physicalAttributes,  String technicalAttributes,  String tacticalAttributes,  String metalAttributes,  String strengths,  String weaknesses,  String risks,  String recommendedRole,  String scoutId,  DateTime createdAt,  String status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String playerId,  String playerName,  String playerPosition,  int playerAge,  String playerTeam,  DateTime matchDate,  String rivalTeam,  String score,  int minutePlayed,  String matchType,  Map<String, int> ratings,  String physicalAttributes,  String technicalAttributes,  String tacticalAttributes,  String metalAttributes,  String strengths,  String weaknesses,  String risks,  String recommendedRole,  String scoutId,  DateTime createdAt,  String description,  List<String> imageUrls,  String status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ScoutReport() when $default != null:
-return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_that.playerAge,_that.playerTeam,_that.matchDate,_that.rivalTeam,_that.score,_that.minutePlayed,_that.matchType,_that.ratings,_that.physicalAttributes,_that.technicalAttributes,_that.tacticalAttributes,_that.metalAttributes,_that.strengths,_that.weaknesses,_that.risks,_that.recommendedRole,_that.scoutId,_that.createdAt,_that.status);case _:
+return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_that.playerAge,_that.playerTeam,_that.matchDate,_that.rivalTeam,_that.score,_that.minutePlayed,_that.matchType,_that.ratings,_that.physicalAttributes,_that.technicalAttributes,_that.tacticalAttributes,_that.metalAttributes,_that.strengths,_that.weaknesses,_that.risks,_that.recommendedRole,_that.scoutId,_that.createdAt,_that.description,_that.imageUrls,_that.status);case _:
   return orElse();
 
 }
@@ -202,10 +204,10 @@ return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String playerId,  String playerName,  String playerPosition,  int playerAge,  String playerTeam,  DateTime matchDate,  String rivalTeam,  String score,  int minutePlayed,  String matchType,  Map<String, int> ratings,  String physicalAttributes,  String technicalAttributes,  String tacticalAttributes,  String metalAttributes,  String strengths,  String weaknesses,  String risks,  String recommendedRole,  String scoutId,  DateTime createdAt,  String status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String playerId,  String playerName,  String playerPosition,  int playerAge,  String playerTeam,  DateTime matchDate,  String rivalTeam,  String score,  int minutePlayed,  String matchType,  Map<String, int> ratings,  String physicalAttributes,  String technicalAttributes,  String tacticalAttributes,  String metalAttributes,  String strengths,  String weaknesses,  String risks,  String recommendedRole,  String scoutId,  DateTime createdAt,  String description,  List<String> imageUrls,  String status)  $default,) {final _that = this;
 switch (_that) {
 case _ScoutReport():
-return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_that.playerAge,_that.playerTeam,_that.matchDate,_that.rivalTeam,_that.score,_that.minutePlayed,_that.matchType,_that.ratings,_that.physicalAttributes,_that.technicalAttributes,_that.tacticalAttributes,_that.metalAttributes,_that.strengths,_that.weaknesses,_that.risks,_that.recommendedRole,_that.scoutId,_that.createdAt,_that.status);case _:
+return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_that.playerAge,_that.playerTeam,_that.matchDate,_that.rivalTeam,_that.score,_that.minutePlayed,_that.matchType,_that.ratings,_that.physicalAttributes,_that.technicalAttributes,_that.tacticalAttributes,_that.metalAttributes,_that.strengths,_that.weaknesses,_that.risks,_that.recommendedRole,_that.scoutId,_that.createdAt,_that.description,_that.imageUrls,_that.status);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -222,10 +224,10 @@ return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String playerId,  String playerName,  String playerPosition,  int playerAge,  String playerTeam,  DateTime matchDate,  String rivalTeam,  String score,  int minutePlayed,  String matchType,  Map<String, int> ratings,  String physicalAttributes,  String technicalAttributes,  String tacticalAttributes,  String metalAttributes,  String strengths,  String weaknesses,  String risks,  String recommendedRole,  String scoutId,  DateTime createdAt,  String status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String playerId,  String playerName,  String playerPosition,  int playerAge,  String playerTeam,  DateTime matchDate,  String rivalTeam,  String score,  int minutePlayed,  String matchType,  Map<String, int> ratings,  String physicalAttributes,  String technicalAttributes,  String tacticalAttributes,  String metalAttributes,  String strengths,  String weaknesses,  String risks,  String recommendedRole,  String scoutId,  DateTime createdAt,  String description,  List<String> imageUrls,  String status)?  $default,) {final _that = this;
 switch (_that) {
 case _ScoutReport() when $default != null:
-return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_that.playerAge,_that.playerTeam,_that.matchDate,_that.rivalTeam,_that.score,_that.minutePlayed,_that.matchType,_that.ratings,_that.physicalAttributes,_that.technicalAttributes,_that.tacticalAttributes,_that.metalAttributes,_that.strengths,_that.weaknesses,_that.risks,_that.recommendedRole,_that.scoutId,_that.createdAt,_that.status);case _:
+return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_that.playerAge,_that.playerTeam,_that.matchDate,_that.rivalTeam,_that.score,_that.minutePlayed,_that.matchType,_that.ratings,_that.physicalAttributes,_that.technicalAttributes,_that.tacticalAttributes,_that.metalAttributes,_that.strengths,_that.weaknesses,_that.risks,_that.recommendedRole,_that.scoutId,_that.createdAt,_that.description,_that.imageUrls,_that.status);case _:
   return null;
 
 }
@@ -237,7 +239,7 @@ return $default(_that.id,_that.playerId,_that.playerName,_that.playerPosition,_t
 @JsonSerializable()
 
 class _ScoutReport implements ScoutReport {
-  const _ScoutReport({required this.id, required this.playerId, required this.playerName, required this.playerPosition, required this.playerAge, required this.playerTeam, required this.matchDate, required this.rivalTeam, required this.score, required this.minutePlayed, required this.matchType, required final  Map<String, int> ratings, required this.physicalAttributes, required this.technicalAttributes, required this.tacticalAttributes, required this.metalAttributes, required this.strengths, required this.weaknesses, required this.risks, required this.recommendedRole, required this.scoutId, required this.createdAt, this.status = 'draft'}): _ratings = ratings;
+  const _ScoutReport({required this.id, required this.playerId, required this.playerName, required this.playerPosition, required this.playerAge, required this.playerTeam, required this.matchDate, required this.rivalTeam, required this.score, required this.minutePlayed, required this.matchType, required final  Map<String, int> ratings, required this.physicalAttributes, required this.technicalAttributes, required this.tacticalAttributes, required this.metalAttributes, required this.strengths, required this.weaknesses, required this.risks, required this.recommendedRole, required this.scoutId, required this.createdAt, required this.description, required final  List<String> imageUrls, this.status = 'draft'}): _ratings = ratings,_imageUrls = imageUrls;
   factory _ScoutReport.fromJson(Map<String, dynamic> json) => _$ScoutReportFromJson(json);
 
 @override final  String id;
@@ -276,6 +278,14 @@ class _ScoutReport implements ScoutReport {
 // Meta
 @override final  String scoutId;
 @override final  DateTime createdAt;
+@override final  String description;
+ final  List<String> _imageUrls;
+@override List<String> get imageUrls {
+  if (_imageUrls is EqualUnmodifiableListView) return _imageUrls;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_imageUrls);
+}
+
 @override@JsonKey() final  String status;
 
 /// Create a copy of ScoutReport
@@ -291,16 +301,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScoutReport&&(identical(other.id, id) || other.id == id)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.playerName, playerName) || other.playerName == playerName)&&(identical(other.playerPosition, playerPosition) || other.playerPosition == playerPosition)&&(identical(other.playerAge, playerAge) || other.playerAge == playerAge)&&(identical(other.playerTeam, playerTeam) || other.playerTeam == playerTeam)&&(identical(other.matchDate, matchDate) || other.matchDate == matchDate)&&(identical(other.rivalTeam, rivalTeam) || other.rivalTeam == rivalTeam)&&(identical(other.score, score) || other.score == score)&&(identical(other.minutePlayed, minutePlayed) || other.minutePlayed == minutePlayed)&&(identical(other.matchType, matchType) || other.matchType == matchType)&&const DeepCollectionEquality().equals(other._ratings, _ratings)&&(identical(other.physicalAttributes, physicalAttributes) || other.physicalAttributes == physicalAttributes)&&(identical(other.technicalAttributes, technicalAttributes) || other.technicalAttributes == technicalAttributes)&&(identical(other.tacticalAttributes, tacticalAttributes) || other.tacticalAttributes == tacticalAttributes)&&(identical(other.metalAttributes, metalAttributes) || other.metalAttributes == metalAttributes)&&(identical(other.strengths, strengths) || other.strengths == strengths)&&(identical(other.weaknesses, weaknesses) || other.weaknesses == weaknesses)&&(identical(other.risks, risks) || other.risks == risks)&&(identical(other.recommendedRole, recommendedRole) || other.recommendedRole == recommendedRole)&&(identical(other.scoutId, scoutId) || other.scoutId == scoutId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScoutReport&&(identical(other.id, id) || other.id == id)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.playerName, playerName) || other.playerName == playerName)&&(identical(other.playerPosition, playerPosition) || other.playerPosition == playerPosition)&&(identical(other.playerAge, playerAge) || other.playerAge == playerAge)&&(identical(other.playerTeam, playerTeam) || other.playerTeam == playerTeam)&&(identical(other.matchDate, matchDate) || other.matchDate == matchDate)&&(identical(other.rivalTeam, rivalTeam) || other.rivalTeam == rivalTeam)&&(identical(other.score, score) || other.score == score)&&(identical(other.minutePlayed, minutePlayed) || other.minutePlayed == minutePlayed)&&(identical(other.matchType, matchType) || other.matchType == matchType)&&const DeepCollectionEquality().equals(other._ratings, _ratings)&&(identical(other.physicalAttributes, physicalAttributes) || other.physicalAttributes == physicalAttributes)&&(identical(other.technicalAttributes, technicalAttributes) || other.technicalAttributes == technicalAttributes)&&(identical(other.tacticalAttributes, tacticalAttributes) || other.tacticalAttributes == tacticalAttributes)&&(identical(other.metalAttributes, metalAttributes) || other.metalAttributes == metalAttributes)&&(identical(other.strengths, strengths) || other.strengths == strengths)&&(identical(other.weaknesses, weaknesses) || other.weaknesses == weaknesses)&&(identical(other.risks, risks) || other.risks == risks)&&(identical(other.recommendedRole, recommendedRole) || other.recommendedRole == recommendedRole)&&(identical(other.scoutId, scoutId) || other.scoutId == scoutId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other._imageUrls, _imageUrls)&&(identical(other.status, status) || other.status == status));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,playerId,playerName,playerPosition,playerAge,playerTeam,matchDate,rivalTeam,score,minutePlayed,matchType,const DeepCollectionEquality().hash(_ratings),physicalAttributes,technicalAttributes,tacticalAttributes,metalAttributes,strengths,weaknesses,risks,recommendedRole,scoutId,createdAt,status]);
+int get hashCode => Object.hashAll([runtimeType,id,playerId,playerName,playerPosition,playerAge,playerTeam,matchDate,rivalTeam,score,minutePlayed,matchType,const DeepCollectionEquality().hash(_ratings),physicalAttributes,technicalAttributes,tacticalAttributes,metalAttributes,strengths,weaknesses,risks,recommendedRole,scoutId,createdAt,description,const DeepCollectionEquality().hash(_imageUrls),status]);
 
 @override
 String toString() {
-  return 'ScoutReport(id: $id, playerId: $playerId, playerName: $playerName, playerPosition: $playerPosition, playerAge: $playerAge, playerTeam: $playerTeam, matchDate: $matchDate, rivalTeam: $rivalTeam, score: $score, minutePlayed: $minutePlayed, matchType: $matchType, ratings: $ratings, physicalAttributes: $physicalAttributes, technicalAttributes: $technicalAttributes, tacticalAttributes: $tacticalAttributes, metalAttributes: $metalAttributes, strengths: $strengths, weaknesses: $weaknesses, risks: $risks, recommendedRole: $recommendedRole, scoutId: $scoutId, createdAt: $createdAt, status: $status)';
+  return 'ScoutReport(id: $id, playerId: $playerId, playerName: $playerName, playerPosition: $playerPosition, playerAge: $playerAge, playerTeam: $playerTeam, matchDate: $matchDate, rivalTeam: $rivalTeam, score: $score, minutePlayed: $minutePlayed, matchType: $matchType, ratings: $ratings, physicalAttributes: $physicalAttributes, technicalAttributes: $technicalAttributes, tacticalAttributes: $tacticalAttributes, metalAttributes: $metalAttributes, strengths: $strengths, weaknesses: $weaknesses, risks: $risks, recommendedRole: $recommendedRole, scoutId: $scoutId, createdAt: $createdAt, description: $description, imageUrls: $imageUrls, status: $status)';
 }
 
 
@@ -311,7 +321,7 @@ abstract mixin class _$ScoutReportCopyWith<$Res> implements $ScoutReportCopyWith
   factory _$ScoutReportCopyWith(_ScoutReport value, $Res Function(_ScoutReport) _then) = __$ScoutReportCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String playerId, String playerName, String playerPosition, int playerAge, String playerTeam, DateTime matchDate, String rivalTeam, String score, int minutePlayed, String matchType, Map<String, int> ratings, String physicalAttributes, String technicalAttributes, String tacticalAttributes, String metalAttributes, String strengths, String weaknesses, String risks, String recommendedRole, String scoutId, DateTime createdAt, String status
+ String id, String playerId, String playerName, String playerPosition, int playerAge, String playerTeam, DateTime matchDate, String rivalTeam, String score, int minutePlayed, String matchType, Map<String, int> ratings, String physicalAttributes, String technicalAttributes, String tacticalAttributes, String metalAttributes, String strengths, String weaknesses, String risks, String recommendedRole, String scoutId, DateTime createdAt, String description, List<String> imageUrls, String status
 });
 
 
@@ -328,7 +338,7 @@ class __$ScoutReportCopyWithImpl<$Res>
 
 /// Create a copy of ScoutReport
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? playerId = null,Object? playerName = null,Object? playerPosition = null,Object? playerAge = null,Object? playerTeam = null,Object? matchDate = null,Object? rivalTeam = null,Object? score = null,Object? minutePlayed = null,Object? matchType = null,Object? ratings = null,Object? physicalAttributes = null,Object? technicalAttributes = null,Object? tacticalAttributes = null,Object? metalAttributes = null,Object? strengths = null,Object? weaknesses = null,Object? risks = null,Object? recommendedRole = null,Object? scoutId = null,Object? createdAt = null,Object? status = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? playerId = null,Object? playerName = null,Object? playerPosition = null,Object? playerAge = null,Object? playerTeam = null,Object? matchDate = null,Object? rivalTeam = null,Object? score = null,Object? minutePlayed = null,Object? matchType = null,Object? ratings = null,Object? physicalAttributes = null,Object? technicalAttributes = null,Object? tacticalAttributes = null,Object? metalAttributes = null,Object? strengths = null,Object? weaknesses = null,Object? risks = null,Object? recommendedRole = null,Object? scoutId = null,Object? createdAt = null,Object? description = null,Object? imageUrls = null,Object? status = null,}) {
   return _then(_ScoutReport(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
@@ -352,7 +362,9 @@ as String,risks: null == risks ? _self.risks : risks // ignore: cast_nullable_to
 as String,recommendedRole: null == recommendedRole ? _self.recommendedRole : recommendedRole // ignore: cast_nullable_to_non_nullable
 as String,scoutId: null == scoutId ? _self.scoutId : scoutId // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as DateTime,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,imageUrls: null == imageUrls ? _self._imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
+as List<String>,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

@@ -29,6 +29,10 @@ _ScoutReport _$ScoutReportFromJson(Map<String, dynamic> json) => _ScoutReport(
   recommendedRole: json['recommendedRole'] as String,
   scoutId: json['scoutId'] as String,
   createdAt: DateTime.parse(json['createdAt'] as String),
+  description: json['description'] as String,
+  imageUrls: (json['imageUrls'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
   status: json['status'] as String? ?? 'draft',
 );
 
@@ -56,5 +60,7 @@ Map<String, dynamic> _$ScoutReportToJson(_ScoutReport instance) =>
       'recommendedRole': instance.recommendedRole,
       'scoutId': instance.scoutId,
       'createdAt': instance.createdAt.toIso8601String(),
+      'description': instance.description,
+      'imageUrls': instance.imageUrls,
       'status': instance.status,
     };

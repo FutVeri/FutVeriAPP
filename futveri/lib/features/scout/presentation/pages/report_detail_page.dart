@@ -42,6 +42,8 @@ class ReportDetailPage extends StatelessWidget {
       recommendedRole: 'Playmaker / No. 10',
       scoutId: 's1',
       createdAt: DateTime.now(),
+      description: 'Exceptional performance in El Clásico. Showed maturity beyond his years.',
+      imageUrls: [],
       status: 'approved',
     );
 

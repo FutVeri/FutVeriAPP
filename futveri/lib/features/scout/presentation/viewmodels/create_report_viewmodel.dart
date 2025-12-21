@@ -7,7 +7,9 @@ class CreateReportState {
   final String playerName;
   final String playerPosition;
   final String rivalTeam;
+  final String description;
   final Map<String, int> ratings;
+  final List<String> selectedImagePaths;
   final bool isSubmitting;
 
   CreateReportState({
@@ -26,6 +28,8 @@ class CreateReportState {
       'Vision': 5,
       'Aggression': 5,
     },
+    this.description = '',
+    this.selectedImagePaths = const [],
     this.isSubmitting = false,
   });
 
@@ -33,14 +37,18 @@ class CreateReportState {
     String? playerName,
     String? playerPosition,
     String? rivalTeam,
+    String? description,
     Map<String, int>? ratings,
+    List<String>? selectedImagePaths,
     bool? isSubmitting,
   }) {
     return CreateReportState(
       playerName: playerName ?? this.playerName,
       playerPosition: playerPosition ?? this.playerPosition,
       rivalTeam: rivalTeam ?? this.rivalTeam,
+      description: description ?? this.description,
       ratings: ratings ?? this.ratings,
+      selectedImagePaths: selectedImagePaths ?? this.selectedImagePaths,
       isSubmitting: isSubmitting ?? this.isSubmitting,
     );
   }
@@ -54,6 +62,22 @@ class CreateReportViewModel extends Notifier<CreateReportState> {
 
   void updatePlayerName(String name) {
     state = state.copyWith(playerName: name);
+  }
+
+  void updateDescription(String value) {
+    state = state.copyWith(description: value);
+  }
+
+  void addImage(String path) {
+    state = state.copyWith(
+      selectedImagePaths: [...state.selectedImagePaths, path],
+    );
+  }
+
+  void removeImage(int index) {
+    final images = [...state.selectedImagePaths];
+    images.removeAt(index);
+    state = state.copyWith(selectedImagePaths: images);
   }
 
   void updateRating(String parameter, int value) {
