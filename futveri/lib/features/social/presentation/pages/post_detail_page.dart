@@ -8,6 +8,7 @@ import 'package:futveri/core/theme/app_theme.dart';
 import 'package:futveri/features/social/presentation/viewmodels/post_detail_viewmodel.dart';
 import 'package:futveri/features/social/presentation/widgets/comment_item_widget.dart';
 import 'package:futveri/features/social/presentation/widgets/comment_input_widget.dart';
+import 'package:futveri/features/social/presentation/widgets/player_ratings_sheet.dart';
 
 class PostDetailPage extends ConsumerStatefulWidget {
   final String postId;
@@ -33,7 +34,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(postDetailProvider(widget.postId));
-    final viewModel = ref.read(postDetailProvider(widget.postId).notifier);
+    final notifier = ref.read(postDetailProvider(widget.postId).notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,7 +88,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
                   _buildLikeButton(
                     state.post.isLiked,
                     state.post.likes,
-                    viewModel.toggleLike,
+                    notifier.toggleLike,
                   ),
                   Gap(24.h),
 
@@ -150,9 +151,9 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
           // Comment Input (Fixed at bottom)
           CommentInputWidget(
             controller: _commentController,
-            onChanged: viewModel.updateCommentText,
+            onChanged: notifier.updateCommentText,
             onSend: () {
-              viewModel.addComment();
+              notifier.addComment();
               _commentController.clear();
             },
           ),
@@ -192,70 +193,84 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
   }
 
   Widget _buildPlayerCard(String playerName, String playerInfo, double rating) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Colors.black, AppTheme.surfaceDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: rating >= 8
-              ? AppTheme.primaryGreen.withOpacity(0.5)
-              : AppTheme.secondaryBlue.withOpacity(0.5),
-          width: 2,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60.w,
-            height: 60.w,
-            decoration: BoxDecoration(
-              color: Colors.white10,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(LucideIcons.user, color: Colors.white24, size: 30.sp),
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (context) => PlayerRatingsSheet(
+            playerName: playerName,
+            playerInfo: playerInfo,
+            overallRating: rating,
           ),
-          Gap(16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  playerName,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Colors.black, AppTheme.surfaceDark],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: rating >= 8
+                ? AppTheme.primaryGreen.withOpacity(0.5)
+                : AppTheme.secondaryBlue.withOpacity(0.5),
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60.w,
+              height: 60.w,
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(LucideIcons.user, color: Colors.white24, size: 30.sp),
+            ),
+            Gap(16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    playerName,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Gap(4.h),
-                Text(
-                  playerInfo,
-                  style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: rating >= 8 ? AppTheme.primaryGreen : AppTheme.secondaryBlue,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              rating.toString(),
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20.sp,
+                  Gap(4.h),
+                  Text(
+                    playerInfo,
+                    style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: rating >= 8 ? AppTheme.primaryGreen : AppTheme.secondaryBlue,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                rating.toString(),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.sp,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -110,7 +110,7 @@ class CreateReportPage extends ConsumerWidget {
             _buildDescriptionField(viewModel),
 
             Gap(24.h),
-            _buildSectionHeader('Proof / Photos (Required)'),
+            _buildSectionHeader('Proof / Photos'),
             Gap(16.h),
             _buildImageSection(context, state, viewModel),
 
@@ -119,7 +119,7 @@ class CreateReportPage extends ConsumerWidget {
               width: double.infinity,
               height: 56.h,
               child: ElevatedButton(
-                onPressed: (state.isSubmitting || state.selectedImagePaths.isEmpty)
+                onPressed: state.isSubmitting
                     ? null
                     : () async {
                         final reportId = await viewModel.submitReport();
@@ -252,9 +252,7 @@ class CreateReportPage extends ConsumerWidget {
               color: AppTheme.surfaceDark,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: state.selectedImagePaths.isEmpty
-                    ? Colors.red.withOpacity(0.3)
-                    : Colors.white.withOpacity(0.05),
+                color: Colors.white.withOpacity(0.05),
                 width: 2,
               ),
             ),
@@ -267,10 +265,10 @@ class CreateReportPage extends ConsumerWidget {
                 ),
                 Gap(12.h),
                 Text(
-                  'At least one photo is required',
+                  'Photos (Optional)',
                   style: TextStyle(
                     fontSize: 14.sp,
-                    color: Colors.red.withOpacity(0.7),
+                    color: AppTheme.textGrey,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

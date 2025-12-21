@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:futveri/features/social/presentation/widgets/feed_post_widget.dart';
+import 'package:futveri/features/social/presentation/widgets/feed_filter_sheet.dart';
 import 'package:futveri/core/theme/app_theme.dart';
 import 'package:gap/gap.dart';
 
@@ -42,14 +43,24 @@ class SocialFeedPage extends StatelessWidget {
                   ),
                 ),
                 Gap(12.w),
-                Container(
-                  padding: EdgeInsets.all(12.w),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceDark,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white10),
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      isScrollControlled: true,
+                      builder: (context) => const FeedFilterSheet(),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceDark,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white10),
+                    ),
+                    child: const Icon(LucideIcons.filter, size: 20, color: Colors.white),
                   ),
-                  child: const Icon(LucideIcons.filter, size: 20, color: Colors.white),
                 ),
               ],
             ),

@@ -31,20 +31,21 @@ class PostDetailState {
   }
 }
 
-class PostDetailNotifier extends Notifier<PostDetailState> {
+// ViewModel for Post Detail
+class PostDetailViewModel extends Notifier<PostDetailState> {
   late String _postId;
+
+  void initialize(String postId) {
+    _postId = postId;
+  }
 
   @override
   PostDetailState build() {
-    // This will be set by the provider
+    // Initial state with mock data
     return PostDetailState(
       post: _getMockPost(),
       comments: _getMockComments(),
     );
-  }
-
-  void setPostId(String postId) {
-    _postId = postId;
   }
 
   void toggleLike() {
@@ -126,7 +127,17 @@ class PostDetailNotifier extends Notifier<PostDetailState> {
   }
 }
 
-// Provider family to accept postId
-final postDetailProvider = NotifierProvider.family<PostDetailNotifier, PostDetailState, String>(
-  () => PostDetailNotifier(),
-);
+// Provider cache for family-like behavior
+final _postDetailProviders = <String, NotifierProvider<PostDetailViewModel, PostDetailState>>{};
+
+// Provider factory
+NotifierProvider<PostDetailViewModel, PostDetailState> postDetailProvider(String postId) {
+  return _postDetailProviders.putIfAbsent(
+    postId,
+    () => NotifierProvider<PostDetailViewModel, PostDetailState>(() {
+      final viewModel = PostDetailViewModel();
+      viewModel.initialize(postId);
+      return viewModel;
+    }),
+  );
+}
