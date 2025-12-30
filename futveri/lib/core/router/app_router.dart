@@ -8,13 +8,15 @@ import 'package:futveri/features/auth/presentation/pages/login_page.dart';
 import 'package:futveri/features/scout/presentation/pages/scout_dashboard_page.dart';
 import 'package:futveri/features/simulation/presentation/pages/simulation_page.dart';
 import 'package:futveri/features/profile/presentation/pages/profile_page.dart';
-import 'package:futveri/features/profile/presentation/pages/personal_info_page.dart';
-import 'package:futveri/features/profile/presentation/pages/notifications_page.dart';
-import 'package:futveri/features/profile/presentation/pages/security_page.dart';
-import 'package:futveri/features/profile/presentation/pages/premium_page.dart';
-import 'package:futveri/features/profile/presentation/pages/terms_page.dart';
-import 'package:futveri/features/profile/presentation/pages/feature_access_page.dart';
-import 'package:futveri/core/widgets/scaffold_with_navbar.dart';
+import '../../features/profile/presentation/pages/personal_info_page.dart';
+import '../../features/profile/presentation/pages/notifications_page.dart';
+import '../../features/profile/presentation/pages/security_page.dart';
+import '../../features/profile/presentation/pages/premium_page.dart';
+import '../../features/profile/presentation/pages/terms_page.dart';
+import '../../features/profile/presentation/pages/feature_access_page.dart';
+import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/home/presentation/widgets/home_modules.dart';
+import '../widgets/scaffold_with_navbar.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
@@ -37,7 +39,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/',
-              builder: (context, state) => const SocialFeedPage(),
+              builder: (context, state) => const HomePage(),
             ),
           ],
         ),
@@ -112,7 +114,7 @@ final router = GoRouter(
     GoRoute(
       path: '/profile/features',
       parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const FeatureAccessPage(),
+      builder: (context, state) => FeatureAccessPage(),
     ),
     GoRoute(
       path: '/report-detail/:id',
@@ -129,6 +131,21 @@ final router = GoRouter(
         final id = state.pathParameters['id']!;
         return PostDetailPage(postId: id);
       },
+    ),
+    GoRoute(
+      path: '/ai-analysis',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const AiAnalysisPage(),
+    ),
+    GoRoute(
+      path: '/popular-feed',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PopularFeedPage(),
+    ),
+    GoRoute(
+      path: '/leaderboard',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const LeaderboardPage(),
     ),
   ],
 );
