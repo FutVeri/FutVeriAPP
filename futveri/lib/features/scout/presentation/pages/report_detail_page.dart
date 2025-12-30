@@ -25,17 +25,16 @@ class ReportDetailPage extends StatelessWidget {
       score: '3-1',
       minutePlayed: 75,
       matchType: 'TV',
-      ratings: {
-          'Technique': 10,
-          'Vision': 9,
-          'Dribbling': 10,
-          'Passing': 8,
-          'Physicality': 6,
-      },
-      physicalAttributes: 'Agile but needs more strength.',
-      technicalAttributes: 'Elite ball control and vision.',
-      tacticalAttributes: 'Understands space perfectly.',
-      metalAttributes: 'Confident and calm under pressure.',
+      physicalRating: 6,
+      physicalDescription: 'Agile but needs more strength.',
+      technicalRating: 10,
+      technicalDescription: 'Elite ball control and vision.',
+      tacticalRating: 9,
+      tacticalDescription: 'Understands space perfectly.',
+      mentalRating: 9,
+      mentalDescription: 'Confident and calm under pressure.',
+      overallRating: 8.8,
+      potentialRating: 9.5,
       strengths: 'Dribbling, Vision, Creativity',
       weaknesses: 'Physical strength, aerial duels',
       risks: 'Injury prone due to physique',
@@ -117,7 +116,7 @@ class ReportDetailPage extends StatelessWidget {
                       border: Border.all(color: AppTheme.primaryGreen),
                     ),
                     child: Text(
-                      '8.8', // Overall Score
+                      scoutReport.overallRating.toString(), // Overall Score
                       style: TextStyle(
                         color: AppTheme.primaryGreen,
                         fontWeight: FontWeight.bold,
@@ -131,9 +130,22 @@ class ReportDetailPage extends StatelessWidget {
             Gap(24.h),
             
             // Attributes Radar Chart (Placeholder) or List
-            _buildAttributeList(scoutReport.ratings),
-
+            _buildSectionHeader('Physical Attributes'),
+            _buildCategoryDetails(scoutReport.physicalRating, scoutReport.physicalDescription),
+            Gap(16.h),
+            
+            _buildSectionHeader('Technical Attributes'),
+            _buildCategoryDetails(scoutReport.technicalRating, scoutReport.technicalDescription),
+            Gap(16.h),
+            
+            _buildSectionHeader('Tactical Attributes'),
+            _buildCategoryDetails(scoutReport.tacticalRating, scoutReport.tacticalDescription),
+            Gap(16.h),
+            
+            _buildSectionHeader('Mental Attributes'),
+            _buildCategoryDetails(scoutReport.mentalRating, scoutReport.mentalDescription),
             Gap(24.h),
+
             _buildAnalysisSection('Strengths', scoutReport.strengths, AppTheme.primaryGreen),
             Gap(12.h),
             _buildAnalysisSection('Weaknesses', scoutReport.weaknesses, AppTheme.errorRed),
@@ -145,54 +157,75 @@ class ReportDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAttributeList(Map<String, int> ratings) {
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Text(
+        title.toUpperCase(),
+        style: TextStyle(
+          color: AppTheme.textGrey,
+          fontWeight: FontWeight.bold,
+          fontSize: 12.sp,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryDetails(int rating, String description) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppTheme.surfaceDark,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: ratings.entries.map((e) {
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.h),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    e.key,
-                    style: const TextStyle(color: Colors.white70),
-                  ),
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Rating',
+                style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: _getRatingColor(rating).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _getRatingColor(rating)),
                 ),
-                Expanded(
-                  flex: 3,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: e.value / 10,
-                      backgroundColor: Colors.white10,
-                      color: e.value >= 8 ? AppTheme.primaryGreen : AppTheme.secondaryBlue,
-                      minHeight: 8.h,
-                    ),
-                  ),
-                ),
-                Gap(12.w),
-                Text(
-                  e.value.toString(),
+                child: Text(
+                  '$rating/10',
                   style: TextStyle(
+                    color: _getRatingColor(rating),
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
                     fontSize: 14.sp,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          Gap(12.h),
+          Text(
+            description,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14.sp,
+              height: 1.4,
             ),
-          );
-        }).toList(),
+          ),
+        ],
       ),
     );
+  }
+
+  Color _getRatingColor(int rating) {
+    if (rating >= 8) return AppTheme.primaryGreen;
+    if (rating >= 5) return AppTheme.secondaryBlue;
+    return AppTheme.errorRed;
   }
 
   Widget _buildAnalysisSection(String title, String content, Color color) {

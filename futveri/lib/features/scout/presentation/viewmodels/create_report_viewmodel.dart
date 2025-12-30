@@ -7,8 +7,27 @@ class CreateReportState {
   final String playerName;
   final String playerPosition;
   final String rivalTeam;
-  final String description;
-  final Map<String, int> ratings;
+  
+  // Physical
+  final int physicalRating;
+  final String physicalDescription;
+  
+  // Technical
+  final int technicalRating;
+  final String technicalDescription;
+  
+  // Tactical
+  final int tacticalRating;
+  final String tacticalDescription;
+  
+  // Mental
+  final int mentalRating;
+  final String mentalDescription;
+  
+  // Overall
+  final double overallRating;
+  final double potentialRating;
+
   final List<String> selectedImagePaths;
   final bool isSubmitting;
 
@@ -16,19 +35,22 @@ class CreateReportState {
     this.playerName = '',
     this.playerPosition = '',
     this.rivalTeam = '',
-    this.ratings = const {
-      'Technique': 5,
-      'Pace': 5,
-      'Passing': 5,
-      'Dribbling': 5,
-      'Defense': 5,
-      'Physicality': 5,
-      'Heading': 5,
-      'Finishing': 5,
-      'Vision': 5,
-      'Aggression': 5,
-    },
-    this.description = '',
+    
+    this.physicalRating = 5,
+    this.physicalDescription = '',
+    
+    this.technicalRating = 5,
+    this.technicalDescription = '',
+    
+    this.tacticalRating = 5,
+    this.tacticalDescription = '',
+    
+    this.mentalRating = 5,
+    this.mentalDescription = '',
+    
+    this.overallRating = 5.0,
+    this.potentialRating = 5.0,
+
     this.selectedImagePaths = const [],
     this.isSubmitting = false,
   });
@@ -37,8 +59,22 @@ class CreateReportState {
     String? playerName,
     String? playerPosition,
     String? rivalTeam,
-    String? description,
-    Map<String, int>? ratings,
+    
+    int? physicalRating,
+    String? physicalDescription,
+    
+    int? technicalRating,
+    String? technicalDescription,
+    
+    int? tacticalRating,
+    String? tacticalDescription,
+    
+    int? mentalRating,
+    String? mentalDescription,
+    
+    double? overallRating,
+    double? potentialRating,
+
     List<String>? selectedImagePaths,
     bool? isSubmitting,
   }) {
@@ -46,8 +82,22 @@ class CreateReportState {
       playerName: playerName ?? this.playerName,
       playerPosition: playerPosition ?? this.playerPosition,
       rivalTeam: rivalTeam ?? this.rivalTeam,
-      description: description ?? this.description,
-      ratings: ratings ?? this.ratings,
+      
+      physicalRating: physicalRating ?? this.physicalRating,
+      physicalDescription: physicalDescription ?? this.physicalDescription,
+      
+      technicalRating: technicalRating ?? this.technicalRating,
+      technicalDescription: technicalDescription ?? this.technicalDescription,
+      
+      tacticalRating: tacticalRating ?? this.tacticalRating,
+      tacticalDescription: tacticalDescription ?? this.tacticalDescription,
+      
+      mentalRating: mentalRating ?? this.mentalRating,
+      mentalDescription: mentalDescription ?? this.mentalDescription,
+      
+      overallRating: overallRating ?? this.overallRating,
+      potentialRating: potentialRating ?? this.potentialRating,
+
       selectedImagePaths: selectedImagePaths ?? this.selectedImagePaths,
       isSubmitting: isSubmitting ?? this.isSubmitting,
     );
@@ -64,8 +114,44 @@ class CreateReportViewModel extends Notifier<CreateReportState> {
     state = state.copyWith(playerName: name);
   }
 
-  void updateDescription(String value) {
-    state = state.copyWith(description: value);
+  void updatePhysicalRating(int value) {
+    state = state.copyWith(physicalRating: value);
+  }
+  
+  void updatePhysicalDescription(String value) {
+    state = state.copyWith(physicalDescription: value);
+  }
+
+  void updateTechnicalRating(int value) {
+    state = state.copyWith(technicalRating: value);
+  }
+  
+  void updateTechnicalDescription(String value) {
+    state = state.copyWith(technicalDescription: value);
+  }
+
+  void updateTacticalRating(int value) {
+    state = state.copyWith(tacticalRating: value);
+  }
+  
+  void updateTacticalDescription(String value) {
+    state = state.copyWith(tacticalDescription: value);
+  }
+
+  void updateMentalRating(int value) {
+    state = state.copyWith(mentalRating: value);
+  }
+  
+  void updateMentalDescription(String value) {
+    state = state.copyWith(mentalDescription: value);
+  }
+
+  void updateOverallRating(double value) {
+    state = state.copyWith(overallRating: value);
+  }
+  
+  void updatePotentialRating(double value) {
+    state = state.copyWith(potentialRating: value);
   }
 
   void addImage(String path) {
@@ -80,18 +166,21 @@ class CreateReportViewModel extends Notifier<CreateReportState> {
     state = state.copyWith(selectedImagePaths: images);
   }
 
-  void updateRating(String parameter, int value) {
-    final newRatings = Map<String, int>.from(state.ratings);
-    newRatings[parameter] = value;
-    state = state.copyWith(ratings: newRatings);
-  }
-
   Future<String?> submitReport() async {
     state = state.copyWith(isSubmitting: true);
     // Simulate API call
     await Future.delayed(const Duration(seconds: 2));
     
     // Here we would construct the ScoutReport object and save it
+    // Example:
+    /*
+    final report = ScoutReport(
+      // ... IDs ...
+      physicalRating: state.physicalRating,
+      physicalDescription: state.physicalDescription,
+      // ... etc
+    );
+    */
     
     state = state.copyWith(isSubmitting: false);
     return '123'; // Return mock ID

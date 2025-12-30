@@ -81,7 +81,48 @@ class CreateReportPage extends ConsumerWidget {
             ),
             
             Gap(24.h),
-            _buildSectionHeader('Technical Assessment'),
+            Gap(24.h),
+            _buildSectionHeader('Physical Attributes'),
+            Gap(8.h),
+            _buildCategorySection(
+              rating: state.physicalRating,
+              description: state.physicalDescription,
+              onRatingChanged: viewModel.updatePhysicalRating,
+              onDescriptionChanged: viewModel.updatePhysicalDescription,
+            ),
+
+            Gap(24.h),
+            _buildSectionHeader('Technical Attributes'),
+            Gap(8.h),
+            _buildCategorySection(
+              rating: state.technicalRating,
+              description: state.technicalDescription,
+              onRatingChanged: viewModel.updateTechnicalRating,
+              onDescriptionChanged: viewModel.updateTechnicalDescription,
+            ),
+
+            Gap(24.h),
+            _buildSectionHeader('Tactical Attributes'),
+            Gap(8.h),
+            _buildCategorySection(
+              rating: state.tacticalRating,
+              description: state.tacticalDescription,
+              onRatingChanged: viewModel.updateTacticalRating,
+              onDescriptionChanged: viewModel.updateTacticalDescription,
+            ),
+
+            Gap(24.h),
+            _buildSectionHeader('Mental Attributes'),
+            Gap(8.h),
+            _buildCategorySection(
+              rating: state.mentalRating,
+              description: state.mentalDescription,
+              onRatingChanged: viewModel.updateMentalRating,
+              onDescriptionChanged: viewModel.updateMentalDescription,
+            ),
+
+            Gap(24.h),
+            _buildSectionHeader('General Evaluation'),
             Gap(8.h),
             Container(
               padding: EdgeInsets.all(16.w),
@@ -91,23 +132,23 @@ class CreateReportPage extends ConsumerWidget {
                 border: Border.all(color: Colors.white.withOpacity(0.05)),
               ),
               child: Column(
-                children: state.ratings.entries.map((entry) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 16.h),
-                    child: RatingSlider(
-                      label: entry.key,
-                      value: entry.value,
-                      onChanged: (val) => viewModel.updateRating(entry.key, val),
-                    ),
-                  );
-                }).toList(),
+                children: [
+                  RatingSlider(
+                    label: 'Overall Rating',
+                    value: state.overallRating.round(),
+                    max: 10,
+                    onChanged: (val) => viewModel.updateOverallRating(val.toDouble()),
+                  ),
+                  Gap(16.h),
+                  RatingSlider(
+                    label: 'Potential',
+                    value: state.potentialRating.round(),
+                    max: 10,
+                    onChanged: (val) => viewModel.updatePotentialRating(val.toDouble()),
+                  ),
+                ],
               ),
             ),
-
-            Gap(24.h),
-            _buildSectionHeader('Description'),
-            Gap(16.h),
-            _buildDescriptionField(viewModel),
 
             Gap(24.h),
             _buildSectionHeader('Proof / Photos'),
@@ -186,41 +227,6 @@ class CreateReportPage extends ConsumerWidget {
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, color: AppTheme.textGrey),
-            filled: true,
-            fillColor: AppTheme.surfaceDark,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDescriptionField(CreateReportViewModel viewModel) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Description',
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: Colors.white70,
-          ),
-        ),
-        Gap(8.h),
-        TextField(
-          onChanged: viewModel.updateDescription,
-          maxLines: 5,
-          style: TextStyle(color: Colors.white, fontSize: 16.sp),
-          decoration: InputDecoration(
-            hintText: 'Add detailed observations, notes, or comments...',
             filled: true,
             fillColor: AppTheme.surfaceDark,
             border: OutlineInputBorder(
@@ -411,5 +417,56 @@ class CreateReportPage extends ConsumerWidget {
     if (pickedFile != null) {
       viewModel.addImage(pickedFile.path);
     }
+  }
+
+  Widget _buildCategorySection({
+    required int rating,
+    required String description,
+    required Function(int) onRatingChanged,
+    required Function(String) onDescriptionChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RatingSlider(
+            label: 'Rating',
+            value: rating,
+            onChanged: onRatingChanged,
+          ),
+          Gap(16.h),
+          Text(
+            'Analysis / Description',
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: Colors.white70,
+            ),
+          ),
+          Gap(8.h),
+          TextField(
+            onChanged: onDescriptionChanged,
+            maxLines: 3,
+            style: TextStyle(color: Colors.white, fontSize: 14.sp),
+            decoration: InputDecoration(
+              hintText: 'Enter detailed analysis...',
+              filled: true,
+              fillColor: Colors.black.withOpacity(0.2),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: EdgeInsets.all(12.w),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

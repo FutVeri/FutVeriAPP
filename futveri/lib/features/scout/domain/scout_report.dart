@@ -20,15 +20,26 @@ abstract class ScoutReport with _$ScoutReport {
     required int minutePlayed,
     required String matchType, // Stadium, TV, etc.
     
-    // Ratings (Map of parameter name to score 1-10)
-    required Map<String, int> ratings,
-    
-    // Analysis
-    required String physicalAttributes,
-    required String technicalAttributes,
-    required String tacticalAttributes,
-    required String metalAttributes,
-    
+    // Physical
+    required int physicalRating,
+    required String physicalDescription,
+
+    // Technical
+    required int technicalRating,
+    required String technicalDescription,
+
+    // Tactical
+    required int tacticalRating,
+    required String tacticalDescription,
+
+    // Mental
+    required int mentalRating,
+    required String mentalDescription,
+
+    // Overall
+    required double overallRating,
+    required double potentialRating,
+
     // SWOT
     required String strengths,
     required String weaknesses,

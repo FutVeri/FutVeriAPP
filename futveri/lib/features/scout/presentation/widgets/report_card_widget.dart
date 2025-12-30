@@ -91,17 +91,11 @@ class ReportCardWidget extends StatelessWidget {
                       Gap(8.h),
                       Row(
                         children: [
-                          _buildRatingBadge(report.ratings['Technique'] ?? 0, 'TEC'),
+                          _buildRatingBadge(report.technicalRating, 'TEC'),
                           Gap(8.w),
-                          _buildRatingBadge(report.ratings['Pace'] ?? 0, 'PAC'),
-                          if (report.ratings.containsKey('Finishing')) ...[
-                              Gap(8.w),
-                              _buildRatingBadge(report.ratings['Finishing']!, 'FIN'),
-                          ],
-                          if (report.ratings.containsKey('Vision')) ...[
-                              Gap(8.w),
-                              _buildRatingBadge(report.ratings['Vision']!, 'VIS'),
-                          ]
+                          _buildRatingBadge(report.physicalRating, 'PHY'),
+                          Gap(8.w),
+                          _buildRatingBadge(report.tacticalRating, 'TAC'),
                         ],
                       ),
                     ],

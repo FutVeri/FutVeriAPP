@@ -6,6 +6,7 @@ import 'package:futveri/core/theme/app_theme.dart';
 class RatingSlider extends StatelessWidget {
   final String label;
   final int value;
+  final int max;
   final Function(int) onChanged;
 
   const RatingSlider({
@@ -13,6 +14,7 @@ class RatingSlider extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
+    this.max = 10,
   });
 
   Color _getColorForValue(int value) {
@@ -67,8 +69,8 @@ class RatingSlider extends StatelessWidget {
           child: Slider(
             value: value.toDouble(),
             min: 1,
-            max: 10,
-            divisions: 9,
+            max: max.toDouble(),
+            divisions: max - 1,
             label: value.toString(),
             onChanged: (val) => onChanged(val.toInt()),
           ),
