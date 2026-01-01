@@ -113,9 +113,14 @@ class ReportDetailDialog extends ConsumerWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: report.ratings.entries.map((entry) {
-                      return _buildRatingChip(entry.key, entry.value);
-                    }).toList(),
+                    children: [
+                      _buildRatingChip('Fiziksel', report.physicalRating),
+                      _buildRatingChip('Teknik', report.technicalRating),
+                      _buildRatingChip('Taktik', report.tacticalRating),
+                      _buildRatingChip('Mental', report.mentalRating),
+                      _buildRatingChip('Genel', report.overallRating.toInt()),
+                      _buildRatingChip('Potansiyel', report.potentialRating.toInt()),
+                    ],
                   ),
                   const Gap(20),
                   // Analysis
@@ -131,10 +136,10 @@ class ReportDetailDialog extends ConsumerWidget {
                               'Analiz',
                               LucideIcons.clipboardList,
                               [
-                                _buildAnalysisItem('Fiziksel', report.physicalAttributes),
-                                _buildAnalysisItem('Teknik', report.technicalAttributes),
-                                _buildAnalysisItem('Taktik', report.tacticalAttributes),
-                                _buildAnalysisItem('Mental', report.mentalAttributes),
+                                _buildAnalysisItem('Fiziksel', report.physicalDescription),
+                                _buildAnalysisItem('Teknik', report.technicalDescription),
+                                _buildAnalysisItem('Taktik', report.tacticalDescription),
+                                _buildAnalysisItem('Mental', report.mentalDescription),
                               ],
                             ),
                           ],

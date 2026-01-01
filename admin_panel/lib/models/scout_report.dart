@@ -1,4 +1,4 @@
-/// Scout Report model - copied from mobile app
+/// Scout Report model - synced with mobile app
 /// Status field: draft, submitted, approved, rejected
 class ScoutReport {
   final String id;
@@ -15,14 +15,25 @@ class ScoutReport {
   final int minutePlayed;
   final String matchType; // Stadium, TV, etc.
 
-  // Ratings (Map of parameter name to score 1-10)
-  final Map<String, int> ratings;
+  // Physical
+  final int physicalRating;
+  final String physicalDescription;
 
-  // Analysis
-  final String physicalAttributes;
-  final String technicalAttributes;
-  final String tacticalAttributes;
-  final String mentalAttributes;
+  // Technical
+  final int technicalRating;
+  final String technicalDescription;
+
+  // Tactical
+  final int tacticalRating;
+  final String tacticalDescription;
+
+  // Mental
+  final int mentalRating;
+  final String mentalDescription;
+
+  // Overall
+  final double overallRating;
+  final double potentialRating;
 
   // SWOT
   final String strengths;
@@ -50,11 +61,16 @@ class ScoutReport {
     required this.score,
     required this.minutePlayed,
     required this.matchType,
-    required this.ratings,
-    required this.physicalAttributes,
-    required this.technicalAttributes,
-    required this.tacticalAttributes,
-    required this.mentalAttributes,
+    required this.physicalRating,
+    required this.physicalDescription,
+    required this.technicalRating,
+    required this.technicalDescription,
+    required this.tacticalRating,
+    required this.tacticalDescription,
+    required this.mentalRating,
+    required this.mentalDescription,
+    required this.overallRating,
+    required this.potentialRating,
     required this.strengths,
     required this.weaknesses,
     required this.risks,
@@ -79,11 +95,16 @@ class ScoutReport {
     String? score,
     int? minutePlayed,
     String? matchType,
-    Map<String, int>? ratings,
-    String? physicalAttributes,
-    String? technicalAttributes,
-    String? tacticalAttributes,
-    String? mentalAttributes,
+    int? physicalRating,
+    String? physicalDescription,
+    int? technicalRating,
+    String? technicalDescription,
+    int? tacticalRating,
+    String? tacticalDescription,
+    int? mentalRating,
+    String? mentalDescription,
+    double? overallRating,
+    double? potentialRating,
     String? strengths,
     String? weaknesses,
     String? risks,
@@ -107,11 +128,16 @@ class ScoutReport {
       score: score ?? this.score,
       minutePlayed: minutePlayed ?? this.minutePlayed,
       matchType: matchType ?? this.matchType,
-      ratings: ratings ?? this.ratings,
-      physicalAttributes: physicalAttributes ?? this.physicalAttributes,
-      technicalAttributes: technicalAttributes ?? this.technicalAttributes,
-      tacticalAttributes: tacticalAttributes ?? this.tacticalAttributes,
-      mentalAttributes: mentalAttributes ?? this.mentalAttributes,
+      physicalRating: physicalRating ?? this.physicalRating,
+      physicalDescription: physicalDescription ?? this.physicalDescription,
+      technicalRating: technicalRating ?? this.technicalRating,
+      technicalDescription: technicalDescription ?? this.technicalDescription,
+      tacticalRating: tacticalRating ?? this.tacticalRating,
+      tacticalDescription: tacticalDescription ?? this.tacticalDescription,
+      mentalRating: mentalRating ?? this.mentalRating,
+      mentalDescription: mentalDescription ?? this.mentalDescription,
+      overallRating: overallRating ?? this.overallRating,
+      potentialRating: potentialRating ?? this.potentialRating,
       strengths: strengths ?? this.strengths,
       weaknesses: weaknesses ?? this.weaknesses,
       risks: risks ?? this.risks,
@@ -123,11 +149,5 @@ class ScoutReport {
       imageUrls: imageUrls ?? this.imageUrls,
       status: status ?? this.status,
     );
-  }
-
-  // Overall rating calculated from all ratings
-  double get overallRating {
-    if (ratings.isEmpty) return 0;
-    return ratings.values.reduce((a, b) => a + b) / ratings.length;
   }
 }
