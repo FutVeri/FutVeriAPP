@@ -1,0 +1,21 @@
+"""
+API v1 router - combines all endpoint routers.
+"""
+from fastapi import APIRouter
+
+from app.api.v1.auth import router as auth_router
+from app.api.v1.dashboard import router as dashboard_router
+from app.api.v1.players import router as players_router
+from app.api.v1.reports import router as reports_router
+from app.api.v1.teams import router as teams_router
+from app.api.v1.users import router as users_router
+
+api_router = APIRouter()
+
+# Include all routers
+api_router.include_router(auth_router)
+api_router.include_router(users_router)
+api_router.include_router(reports_router)
+api_router.include_router(players_router)
+api_router.include_router(teams_router)
+api_router.include_router(dashboard_router)
