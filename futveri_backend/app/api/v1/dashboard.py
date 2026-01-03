@@ -56,7 +56,7 @@ async def get_dashboard_stats(
     
     clubs_result = await db.execute(
         select(func.count(User.id)).where(User.role == "club")
-    )
+    )@
     clubs_count = clubs_result.scalar()
     
     # Report stats
