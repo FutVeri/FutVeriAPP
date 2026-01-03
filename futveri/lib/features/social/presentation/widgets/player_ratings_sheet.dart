@@ -3,17 +3,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:futveri/core/theme/app_theme.dart';
+import 'package:futveri/features/scout/domain/scout_report.dart';
 
 class PlayerRatingsSheet extends StatelessWidget {
   final String playerName;
   final String playerInfo;
   final double overallRating;
+  final ScoutReport? report;
 
   const PlayerRatingsSheet({
     super.key,
     required this.playerName,
     required this.playerInfo,
     required this.overallRating,
+    this.report,
   });
 
   @override
@@ -109,31 +112,31 @@ class PlayerRatingsSheet extends StatelessWidget {
                   Gap(16.h),
                   _buildRatingItem(
                     'Technical',
-                    8.5,
+                    report?.technicalRating?.toDouble() ?? 0.0,
                     LucideIcons.zap,
                     Colors.blue,
                   ),
                   _buildRatingItem(
                     'Physical',
-                    7.5,
+                    report?.physicalRating?.toDouble() ?? 0.0,
                     LucideIcons.activity,
                     Colors.green,
                   ),
                   _buildRatingItem(
                     'Mental',
-                    8.0,
+                    report?.mentalRating?.toDouble() ?? 0.0,
                     LucideIcons.brain,
                     Colors.purple,
                   ),
                   _buildRatingItem(
                     'Tactical',
-                    7.0,
+                    report?.tacticalRating?.toDouble() ?? 0.0,
                     LucideIcons.target,
                     Colors.orange,
                   ),
                   _buildRatingItem(
                     'Potential',
-                    9.0,
+                    report?.potentialRating?.toDouble() ?? 0.0,
                     LucideIcons.trendingUp,
                     Colors.amber,
                   ),

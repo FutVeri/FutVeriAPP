@@ -4,7 +4,7 @@ import 'package:gap/gap.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/glassmorphism.dart';
 import '../../models/scout_report.dart';
-import '../../services/mock_data_service.dart';
+import '../../core/supabase/supabase_client.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -15,13 +15,92 @@ class ReportsScreen extends StatefulWidget {
 
 class _ReportsScreenState extends State<ReportsScreen> {
   ReportStatus? _selectedStatus;
+  List<ScoutReport> _reports = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReports();
+  }
+
+  Future<void> _loadReports() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      final response = await supabase.client
+          .from('scout_reports')
+          .select()
+          .order('created_at', ascending: false);
+      
+      final reports = (response as List).map((data) {
+        // Map status from string to enum
+        ReportStatus status;
+        switch (data['status']) {
+          case 'approved':
+            status = ReportStatus.approved;
+            break;
+          case 'rejected':
+            status = ReportStatus.rejected;
+            break;
+          default:
+            status = ReportStatus.pending;
+        }
+        
+        return ScoutReport(
+          id: data['id'] as String,
+          playerName: data['player_name'] as String,
+          playerImage: data['player_image_url'] as String?,
+          scoutName: 'Scout', // No scout name in current report table
+          scoutId: data['scout_id'] as String,
+          playerAge: data['player_age'] as int,
+          position: data['player_position'] as String,
+          currentClub: data['player_team'] as String,
+          createdAt: DateTime.parse(data['created_at'] as String),
+          status: status,
+          physical: RatingDetails(
+            value: data['physical_rating'] as int,
+            description: data['physical_description'] as String? ?? '',
+          ),
+          technical: RatingDetails(
+            value: data['technical_rating'] as int,
+            description: data['technical_description'] as String? ?? '',
+          ),
+          tactical: RatingDetails(
+            value: data['tactical_rating'] as int,
+            description: data['tactical_description'] as String? ?? '',
+          ),
+          mental: RatingDetails(
+            value: data['mental_rating'] as int,
+            description: data['mental_description'] as String? ?? '',
+          ),
+          overall: RatingDetails(
+            value: (data['overall_rating'] as num).round(),
+            description: data['description'] as String? ?? '',
+          ),
+          potential: RatingDetails(
+            value: (data['potential_rating'] as num).round(),
+            description: data['recommended_role'] as String? ?? '',
+          ),
+          notes: data['notes'] as String?,
+        );
+      }).toList();
+      
+      setState(() {
+        _reports = reports;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading reports: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final allReports = MockDataService().getScoutReports();
     final filteredReports = _selectedStatus == null
-        ? allReports
-        : allReports.where((r) => r.status == _selectedStatus).toList();
+        ? _reports
+        : _reports.where((r) => r.status == _selectedStatus).toList();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -45,7 +124,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     ),
                     const Gap(4),
                     Text(
-                      '${allReports.length} toplam rapor',
+                      '${_reports.length} toplam rapor',
                       style: TextStyle(
                         color: AppTheme.textGrey.withValues(alpha: 0.8),
                         fontSize: 14,
@@ -54,6 +133,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   ],
                 ),
                 const Spacer(),
+                // Refresh button
+                IconButton(
+                  onPressed: _loadReports,
+                  icon: Icon(
+                    _isLoading ? LucideIcons.loader : LucideIcons.refreshCw,
+                    color: AppTheme.primaryGreen,
+                  ),
+                ),
+                const Gap(8),
                 // Status Filter
                 ...ReportStatus.values.map((status) => Padding(
                   padding: const EdgeInsets.only(left: 8),
@@ -72,22 +160,38 @@ class _ReportsScreenState extends State<ReportsScreen> {
             const Gap(24),
             // Reports Table
             Expanded(
-              child: GlassCard(
-                padding: EdgeInsets.zero,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: ListView.separated(
-                    itemCount: filteredReports.length,
-                    separatorBuilder: (_, idx) => Divider(
-                      color: AppTheme.glassBorder,
-                      height: 1,
-                    ),
-                    itemBuilder: (context, index) {
-                      return _buildReportRow(filteredReports[index]);
-                    },
-                  ),
-                ),
-              ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : filteredReports.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(LucideIcons.fileText, size: 64, color: AppTheme.textGrey),
+                              const Gap(16),
+                              Text(
+                                'Henüz rapor yok',
+                                style: TextStyle(color: AppTheme.textGrey, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        )
+                      : GlassCard(
+                          padding: EdgeInsets.zero,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: ListView.separated(
+                              itemCount: filteredReports.length,
+                              separatorBuilder: (_, idx) => Divider(
+                                color: AppTheme.glassBorder,
+                                height: 1,
+                              ),
+                              itemBuilder: (context, index) {
+                                return _buildReportRow(filteredReports[index]);
+                              },
+                            ),
+                          ),
+                        ),
             ),
           ],
         ),
@@ -468,9 +572,9 @@ class _ReportDetailDialog extends StatelessWidget {
   }
 
   Color _getRatingColor(int value) {
-    if (value >= 85) return AppTheme.primaryGreen;
-    if (value >= 75) return AppTheme.secondaryBlue;
-    if (value >= 65) return AppTheme.warningOrange;
+    if (value >= 9) return AppTheme.primaryGreen;
+    if (value >= 7) return AppTheme.secondaryBlue;
+    if (value >= 5) return AppTheme.warningOrange;
     return AppTheme.errorRed;
   }
 

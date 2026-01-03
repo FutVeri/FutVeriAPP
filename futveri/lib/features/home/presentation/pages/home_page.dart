@@ -10,6 +10,8 @@ import '../widgets/search_bar_widget.dart';
 import '../widgets/player_search_card.dart';
 import '../widgets/home_modules.dart';
 import 'package:futveri/features/social/presentation/widgets/feed_post_widget.dart';
+import 'package:futveri/features/social/presentation/viewmodels/social_feed_viewmodel.dart';
+import 'package:futveri/features/scout/presentation/viewmodels/scout_reports_viewmodel.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -46,7 +48,7 @@ class HomePage extends ConsumerWidget {
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: _buildBody(context, state),
+              child: _buildBody(context, state, ref),
             ),
           ),
         ],
@@ -54,9 +56,9 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, HomeState state) {
+  Widget _buildBody(BuildContext context, HomeState state, WidgetRef ref) {
     if (state.searchQuery.isEmpty) {
-      return _buildDashboardContent(context);
+      return _buildDashboardContent(context, ref);
     } else if (state.isSearching) {
       return const Center(child: CircularProgressIndicator());
     } else if (state.searchResults.isEmpty) {
@@ -77,7 +79,9 @@ class HomePage extends ConsumerWidget {
     }
   }
 
-  Widget _buildDashboardContent(BuildContext context) {
+  Widget _buildDashboardContent(BuildContext context, WidgetRef ref) {
+    final socialState = ref.watch(socialFeedProvider);
+    
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +120,7 @@ class HomePage extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Recent Reports',
+                'ScoutHub Feed',
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
@@ -124,9 +128,11 @@ class HomePage extends ConsumerWidget {
                 ),
               ),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  ref.read(socialFeedProvider.notifier).loadPosts();
+                },
                 child: Text(
-                  'See All',
+                  'Yenile',
                   style: TextStyle(
                     color: AppTheme.primaryGreen,
                     fontSize: 14.sp,
@@ -137,31 +143,44 @@ class HomePage extends ConsumerWidget {
           ),
           Gap(16.h),
           
-          // Social Feed Posts
-          const FeedPostWidget(
-            scoutName: 'Ahmet Yılmaz',
-            playerName: 'Semih Kılıçsoy',
-            playerInfo: 'Beşiktaş • FW • 19 yo',
-            rating: 8.5,
-            comment: 'Incredible finishing ability for his age. Needs to improve decision making in tight spaces.',
-            likes: 124,
-          ),
-          const FeedPostWidget(
-            scoutName: 'Global Scout',
-            playerName: 'Can Uzun',
-            playerInfo: 'FC Nürnberg • CAM • 18 yo',
-            rating: 9.0,
-            comment: 'Top class vision. A true number 10 potential.',
-            likes: 350,
-          ),
-          const FeedPostWidget(
-            scoutName: 'FutVeri Analytics',
-            playerName: 'Enis Destan',
-            playerInfo: 'Trabzonspor • ST • 21 yo',
-            rating: 7.8,
-            comment: 'Strong aerial ability. Holding play is developing well.',
-            likes: 89,
-          ),
+          // ScoutHub Feed (Shared Posts)
+          if (socialState.isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (socialState.posts.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(24.w),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceDark,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Icon(LucideIcons.share2, size: 48.sp, color: AppTheme.textGrey),
+                  Gap(12.h),
+                  Text(
+                    'Henüz paylaşılan rapor yok',
+                    style: TextStyle(color: AppTheme.textGrey, fontSize: 14.sp),
+                  ),
+                  Gap(8.h),
+                  Text(
+                    'Kendi raporlarınızı paylaşarak ScoutHub\'da görünmesini sağlayın!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppTheme.textGrey.withOpacity(0.6), fontSize: 12.sp),
+                  ),
+                ],
+              ),
+            )
+          else
+            ...socialState.posts.map((post) => FeedPostWidget(
+              postId: post.id,
+              scoutName: post.scoutName,
+              playerName: post.playerName,
+              playerInfo: post.playerInfo,
+              rating: post.rating,
+              comment: post.comment,
+              likes: post.likes,
+            )),
           
           Gap(32.h),
           _buildCreateReportBanner(context),

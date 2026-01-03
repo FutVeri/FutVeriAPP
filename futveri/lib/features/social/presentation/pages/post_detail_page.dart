@@ -9,6 +9,7 @@ import 'package:futveri/features/social/presentation/viewmodels/post_detail_view
 import 'package:futveri/features/social/presentation/widgets/comment_item_widget.dart';
 import 'package:futveri/features/social/presentation/widgets/comment_input_widget.dart';
 import 'package:futveri/features/social/presentation/widgets/player_ratings_sheet.dart';
+import 'package:futveri/features/scout/domain/scout_report.dart';
 
 class PostDetailPage extends ConsumerStatefulWidget {
   final String postId;
@@ -52,113 +53,149 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Scrollable Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Post Header
-                  _buildPostHeader(state.post.scoutName, state.post.createdAt),
-                  Gap(16.h),
+      body: _buildBody(context, state, notifier),
+    );
+  }
 
-                  // Player Card
-                  _buildPlayerCard(
-                    state.post.playerName,
-                    state.post.playerInfo,
-                    state.post.rating,
+  Widget _buildBody(BuildContext context, PostDetailState state, PostDetailViewModel notifier) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.errorMessage != null && state.post == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(state.errorMessage!, style: const TextStyle(color: Colors.white)),
+            Gap(16.h),
+            ElevatedButton(
+              onPressed: () => notifier.loadPostAndComments(),
+              child: const Text('Tekrar Dene'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state.post == null) {
+      return const Center(child: Text('Gönderi bulunamadı', style: TextStyle(color: Colors.white)));
+    }
+
+    final post = state.post!;
+
+    return Column(
+      children: [
+        // Scrollable Content
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Post Header
+                _buildPostHeader(post.scoutName, post.createdAt),
+                Gap(16.h),
+
+                // Player Card
+                _buildPlayerCard(
+                  post.playerName,
+                  post.playerInfo,
+                  post.rating,
+                  state.report,
+                ),
+                Gap(16.h),
+
+                // Analysis Text
+                Text(
+                  post.comment,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    color: Colors.white,
+                    height: 1.6,
                   ),
-                  Gap(16.h),
+                ),
+                Gap(24.h),
 
-                  // Analysis Text
-                  Text(
-                    state.post.comment,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      color: Colors.white,
-                      height: 1.6,
+                // Like Button
+                _buildLikeButton(
+                  post.isLiked,
+                  post.likes,
+                  notifier.toggleLike,
+                ),
+                Gap(24.h),
+
+                // Comments Section Header
+                Row(
+                  children: [
+                    Icon(
+                      LucideIcons.messageSquare,
+                      size: 18.sp,
+                      color: AppTheme.textGrey,
                     ),
-                  ),
-                  Gap(24.h),
-
-                  // Like Button
-                  _buildLikeButton(
-                    state.post.isLiked,
-                    state.post.likes,
-                    notifier.toggleLike,
-                  ),
-                  Gap(24.h),
-
-                  // Comments Section Header
-                  Row(
-                    children: [
-                      Icon(
-                        LucideIcons.messageSquare,
-                        size: 18.sp,
-                        color: AppTheme.textGrey,
+                    Gap(8.w),
+                    Text(
+                      'Yorumlar (${post.commentCount})',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      Gap(8.w),
-                      Text(
-                        'Comments (${state.post.commentCount})',
+                    ),
+                  ],
+                ),
+                Gap(16.h),
+
+                // Comments List
+                if (state.comments.isEmpty && !state.isLoadingComments)
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32.h),
+                      child: Text(
+                        'Henüz yorum yok. İlk yorumu siz yapın!',
                         style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          fontSize: 14.sp,
+                          color: AppTheme.textGrey,
                         ),
                       ),
-                    ],
-                  ),
-                  Gap(16.h),
-
-                  // Comments List
-                  if (state.comments.isEmpty)
-                    Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32.h),
-                        child: Text(
-                          'No comments yet. Be the first to comment!',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: AppTheme.textGrey,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: state.comments.length,
-                      separatorBuilder: (context, index) => Divider(
-                        color: Colors.white.withOpacity(0.05),
-                        height: 1,
-                      ),
-                      itemBuilder: (context, index) {
-                        return CommentItemWidget(
-                          comment: state.comments[index],
-                        );
-                      },
                     ),
-                  Gap(80.h), // Space for comment input
-                ],
-              ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: state.comments.length,
+                    separatorBuilder: (context, index) => Divider(
+                      color: Colors.white.withOpacity(0.05),
+                      height: 1,
+                    ),
+                    itemBuilder: (context, index) {
+                      return CommentItemWidget(
+                        comment: state.comments[index],
+                      );
+                    },
+                  ),
+                if (state.isLoadingComments)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                Gap(80.h), // Space for comment input
+              ],
             ),
           ),
+        ),
 
-          // Comment Input (Fixed at bottom)
-          CommentInputWidget(
-            controller: _commentController,
-            onChanged: notifier.updateCommentText,
-            onSend: () {
-              notifier.addComment();
-              _commentController.clear();
-            },
-          ),
-        ],
-      ),
+        // Comment Input (Fixed at bottom)
+        CommentInputWidget(
+          controller: _commentController,
+          onChanged: notifier.updateCommentText,
+          onSend: () {
+            notifier.addComment();
+            _commentController.clear();
+          },
+        ),
+      ],
     );
   }
 
@@ -192,7 +229,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
     );
   }
 
-  Widget _buildPlayerCard(String playerName, String playerInfo, double rating) {
+  Widget _buildPlayerCard(String playerName, String playerInfo, double rating, ScoutReport? report) {
     return GestureDetector(
       onTap: () {
         showModalBottomSheet(
@@ -203,6 +240,7 @@ class _PostDetailPageState extends ConsumerState<PostDetailPage> {
             playerName: playerName,
             playerInfo: playerInfo,
             overallRating: rating,
+            report: report,
           ),
         );
       },
