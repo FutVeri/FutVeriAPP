@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'api_config.dart';
 
-/// API Client with JWT authentication support
+/// API Client with JWT authentication support for Club Panel
 class ApiClient {
   static ApiClient? _instance;
   late final Dio _dio;
@@ -31,10 +31,8 @@ class ApiClient {
       },
       onError: (error, handler) async {
         if (error.response?.statusCode == 401 && _refreshToken != null) {
-          // Try to refresh token
           final refreshed = await _refreshAccessToken();
           if (refreshed) {
-            // Retry the request
             final opts = error.requestOptions;
             opts.headers['Authorization'] = 'Bearer $_accessToken';
             try {
@@ -87,7 +85,7 @@ class ApiClient {
       final response = await _dio.post(
         '/auth/refresh',
         data: {'refresh_token': _refreshToken},
-        options: Options(headers: {}), // Don't send old token
+        options: Options(headers: {}),
       );
       
       if (response.statusCode == 200) {
@@ -96,7 +94,6 @@ class ApiClient {
         return true;
       }
     } catch (e) {
-      // Token refresh failed, clear tokens
       await clearTokens();
     }
     return false;

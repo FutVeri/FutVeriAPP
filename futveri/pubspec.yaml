@@ -47,9 +47,9 @@ dependencies:
   dotted_border: ^3.1.0
   lucide_icons: ^0.257.0
   
-  # API & Network
-  dio: ^5.4.0
-  flutter_secure_storage: ^9.2.2
+  # API & Storage
+  dio: ^5.7.0
+  flutter_secure_storage: ^9.2.4
 
 dev_dependencies:
   flutter_test:

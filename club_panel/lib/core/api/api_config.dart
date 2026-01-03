@@ -1,4 +1,4 @@
-/// API configuration for FutVeri mobile app
+/// API configuration for Club Panel
 class ApiConfig {
   /// Base URL for the API
   /// Change this to your production URL when deploying
@@ -12,7 +12,7 @@ class ApiConfig {
   static bool useMockDataFallback = true;
   
   /// Storage keys
-  static const String accessTokenKey = 'access_token';
-  static const String refreshTokenKey = 'refresh_token';
-  static const String userDataKey = 'user_data';
+  static const String accessTokenKey = 'club_access_token';
+  static const String refreshTokenKey = 'club_refresh_token';
+  static const String userDataKey = 'club_user_data';
 }
