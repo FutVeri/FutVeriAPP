@@ -55,7 +55,7 @@ class CreateReportPage extends ConsumerWidget {
                     label: 'Position',
                     hint: 'e.g. ST',
                     icon: LucideIcons.shirt,
-                    onChanged: (val) {}, 
+                    onChanged: viewModel.updatePlayerPosition, 
                   ),
                 ),
                 Gap(12.w),
@@ -64,7 +64,10 @@ class CreateReportPage extends ConsumerWidget {
                     label: 'Age',
                     hint: 'e.g. 23',
                     icon: LucideIcons.calendar,
-                    onChanged: (val) {},
+                    onChanged: (val) {
+                      final age = int.tryParse(val);
+                      if (age != null) viewModel.updatePlayerAge(age);
+                    },
                   ),
                 ),
               ],
@@ -77,7 +80,7 @@ class CreateReportPage extends ConsumerWidget {
               label: 'Rival Team',
               hint: 'Opponent Name',
               icon: LucideIcons.swords,
-              onChanged: (val) {},
+              onChanged: viewModel.updateRivalTeam,
             ),
             
             Gap(24.h),
