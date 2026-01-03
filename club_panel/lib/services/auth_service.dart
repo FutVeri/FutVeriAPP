@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/club.dart';
 import '../core/constants/app_constants.dart';
+import '../core/api/auth_api.dart';
+import '../core/api/api_config.dart';
 
 /// Auth state
 class AuthState {
@@ -31,8 +33,10 @@ class AuthState {
   }
 }
 
-/// Auth notifier
+/// Auth notifier with real API integration and mock fallback
 class AuthNotifier extends Notifier<AuthState> {
+  final AuthApi _authApi = AuthApi();
+  
   @override
   AuthState build() {
     return const AuthState();
@@ -41,8 +45,43 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<bool> login(String email, String password) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
+    // Try real API first
+    try {
+      final authResponse = await _authApi.login(email, password);
+      final userResponse = await _authApi.getCurrentUser();
+      
+      // Check if user has club role
+      if (userResponse.role != 'club' && userResponse.role != 'admin' && userResponse.role != 'superadmin') {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Bu hesap kulüp paneli için yetkilendirilmemiş',
+        );
+        return false;
+      }
+      
+      state = state.copyWith(
+        currentClub: userResponse.toClub(),
+        isLoading: false,
+      );
+      return true;
+    } catch (e) {
+      // Fallback to mock data if API fails and fallback is enabled
+      if (ApiConfig.useMockDataFallback) {
+        return _loginWithMockData(email, password);
+      }
+      
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Bağlantı hatası: ${e.toString()}',
+      );
+      return false;
+    }
+  }
+  
+  /// Fallback to mock login when API is unavailable
+  Future<bool> _loginWithMockData(String email, String password) async {
     // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 300));
 
     if (email == AppConstants.clubEmail &&
         password == AppConstants.clubPassword) {
@@ -68,12 +107,32 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    try {
+      await _authApi.logout();
+    } catch (e) {
+      // Ignore logout errors
+    }
     state = const AuthState();
   }
 
   void clearError() {
     state = state.copyWith(clearError: true);
+  }
+  
+  /// Initialize auth state on app startup
+  Future<void> initialize() async {
+    try {
+      await _authApi.initialize();
+      if (_authApi.isLoggedIn) {
+        final userResponse = await _authApi.getCurrentUser();
+        state = state.copyWith(
+          currentClub: userResponse.toClub(),
+        );
+      }
+    } catch (e) {
+      // Ignore initialization errors
+    }
   }
 }
 
