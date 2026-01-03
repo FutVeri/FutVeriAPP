@@ -72,6 +72,13 @@ class CreateReportPage extends ConsumerWidget {
                 ),
               ],
             ),
+            Gap(12.h),
+            _buildTextField(
+              label: 'Player Team',
+              hint: 'e.g. Galatasaray',
+              icon: LucideIcons.shield,
+              onChanged: viewModel.updatePlayerTeam,
+            ),
             
             Gap(24.h),
             _buildSectionHeader('Match Context'),
@@ -159,6 +166,29 @@ class CreateReportPage extends ConsumerWidget {
             _buildImageSection(context, state, viewModel),
 
             Gap(24.h),
+            // Error message display
+            if (state.errorMessage != null)
+              Container(
+                padding: EdgeInsets.all(12.w),
+                margin: EdgeInsets.only(bottom: 16.h),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(LucideIcons.alertCircle, color: Colors.red, size: 20.sp),
+                    Gap(8.w),
+                    Expanded(
+                      child: Text(
+                        state.errorMessage!,
+                        style: TextStyle(color: Colors.red, fontSize: 14.sp),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             SizedBox(
               width: double.infinity,
               height: 56.h,
@@ -166,7 +196,10 @@ class CreateReportPage extends ConsumerWidget {
                 onPressed: state.isSubmitting
                     ? null
                     : () async {
+                        print('🔘 Submit button pressed!');
+                        print('🔘 isSubmitting: ${state.isSubmitting}');
                         final reportId = await viewModel.submitReport();
+                        print('🔘 Report result: $reportId');
                         if (context.mounted && reportId != null) {
                           context.push('/report-detail/$reportId');
                         }
@@ -254,7 +287,7 @@ class CreateReportPage extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (state.selectedImagePaths.isEmpty)
+        if (state.imageUrls.isEmpty)
           Container(
             padding: EdgeInsets.all(24.w),
             decoration: BoxDecoration(
@@ -314,14 +347,14 @@ class CreateReportPage extends ConsumerWidget {
                   crossAxisSpacing: 8.w,
                   mainAxisSpacing: 8.h,
                 ),
-                itemCount: state.selectedImagePaths.length,
+                itemCount: state.imageUrls.length,
                 itemBuilder: (context, index) {
                   return Stack(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: Image.file(
-                          File(state.selectedImagePaths[index]),
+                          File(state.imageUrls[index]),
                           fit: BoxFit.cover,
                           width: double.infinity,
                           height: double.infinity,

@@ -1,23 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:futveri/features/scout/domain/scout_report.dart';
+import 'package:futveri/core/supabase/supabase_client.dart';
 
 // State for Scout Reports List
 class ScoutReportsState {
   final List<ScoutReport> reports;
   final bool isLoading;
+  final String? errorMessage;
 
   ScoutReportsState({
     this.reports = const [],
     this.isLoading = false,
+    this.errorMessage,
   });
 
   ScoutReportsState copyWith({
     List<ScoutReport>? reports,
     bool? isLoading,
+    String? errorMessage,
+    bool clearError = false,
   }) {
     return ScoutReportsState(
       reports: reports ?? this.reports,
       isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }
@@ -25,113 +31,82 @@ class ScoutReportsState {
 class ScoutReportsViewModel extends Notifier<ScoutReportsState> {
   @override
   ScoutReportsState build() {
-    return ScoutReportsState(
-      reports: _getMockReports(),
-    );
+    // Load reports on init
+    Future.microtask(() => loadReports());
+    return ScoutReportsState(isLoading: true);
   }
 
-  List<ScoutReport> _getMockReports() {
-    return [
-      ScoutReport(
-        id: '1',
-        playerId: 'p1',
-        playerName: 'Semih Kılıçsoy',
-        playerPosition: 'ST',
-        playerAge: 19,
-        playerTeam: 'Beşiktaş',
-        matchDate: DateTime.now().subtract(const Duration(days: 2)),
-        rivalTeam: 'Galatasaray',
-        score: '2-1',
-        minutePlayed: 90,
-        matchType: 'Stadium',
-        physicalRating: 7,
-        physicalDescription: 'Strong and resilient.',
-        technicalRating: 9,
-        technicalDescription: 'Excellent finishing and dribbling.',
-        tacticalRating: 8,
-        tacticalDescription: 'Great positioning.',
-        mentalRating: 9,
-        mentalDescription: 'Highly motivated.',
-        overallRating: 8.5,
-        potentialRating: 9.5,
-        strengths: 'Finishing, Strength',
-        weaknesses: 'Experience',
-        risks: 'Injuries',
-        recommendedRole: 'Target Man',
-        scoutId: 's1',
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        description: 'Incredible finishing ability for his age. Needs to improve decision making in tight spaces. exceptional potential.',
-        imageUrls: [],
-        status: 'submitted',
-      ),
-      ScoutReport(
-        id: '2',
-        playerId: 'p2',
-        playerName: 'Arda Güler',
-        playerPosition: 'CAM',
-        playerAge: 19,
-        playerTeam: 'Real Madrid',
-        matchDate: DateTime.now().subtract(const Duration(days: 5)),
-        rivalTeam: 'Barcelona',
-        score: '3-2',
-        minutePlayed: 75,
-        matchType: 'Stadium',
-        physicalRating: 6,
-        physicalDescription: 'Lean, needs more muscle.',
-        technicalRating: 10,
-        technicalDescription: 'World class technique.',
-        tacticalRating: 9,
-        tacticalDescription: 'IQ is very high.',
-        mentalRating: 9,
-        mentalDescription: 'Confident.',
-        overallRating: 9.2,
-        potentialRating: 10.0,
-        strengths: 'Vision, Passing, Technique',
-        weaknesses: 'Physicality',
-        risks: 'Game time',
-        recommendedRole: 'Playmaker',
-        scoutId: 's1',
-        createdAt: DateTime.now().subtract(const Duration(days: 5)),
-        description: 'Transcendental talent with the ball. His vision is unparalleled in his age group.',
-        imageUrls: [],
-        status: 'approved',
-      ),
-      ScoutReport(
-        id: '3',
-        playerId: 'p3',
-        playerName: 'Kenan Yıldız',
-        playerPosition: 'LW',
-        playerAge: 19,
-        playerTeam: 'Juventus',
-        matchDate: DateTime.now().subtract(const Duration(days: 10)),
-        rivalTeam: 'Inter',
-        score: '1-1',
-        minutePlayed: 82,
-        matchType: 'Stadium',
-        physicalRating: 8,
-        physicalDescription: 'Strong and fast.',
-        technicalRating: 9,
-        technicalDescription: 'Great dribbler.',
-        tacticalRating: 8,
-        tacticalDescription: 'Versatile.',
-        mentalRating: 9,
-        mentalDescription: 'Clutch player.',
-        overallRating: 8.7,
-        potentialRating: 9.3,
-        strengths: 'Dribbling, Versatility',
-        weaknesses: 'Consistency',
-        risks: 'None',
-        recommendedRole: 'Inside Forward',
-        scoutId: 's1',
-        createdAt: DateTime.now().subtract(const Duration(days: 10)),
-        description: 'Dynamic winger with great 1v1 ability. Shows great maturity in big games.',
-        imageUrls: [],
-        status: 'submitted',
-      ),
-    ];
+  /// Load reports from Supabase
+  Future<void> loadReports() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    
+    try {
+      final user = supabase.auth.currentUser;
+      if (user == null) return;
+
+      print('📋 Loading reports for user ${user.id} from Supabase...');
+      final response = await supabase.client
+          .from('scout_reports')
+          .select()
+          .eq('scout_id', user.id)
+          .order('created_at', ascending: false);
+      
+      print('📋 Got ${response.length} reports');
+      
+      final reports = (response as List).map((data) {
+        return ScoutReport.fromJson(data as Map<String, dynamic>);
+      }).toList();
+      
+      state = state.copyWith(reports: reports, isLoading: false);
+      print('✅ Reports loaded successfully');
+    } catch (e) {
+      print('❌ Error loading reports: $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Raporlar yüklenemedi: $e',
+      );
+    }
+  }
+
+  /// Refresh reports
+  Future<void> refresh() => loadReports();
+
+  /// Delete report
+  Future<bool> deleteReport(String id) async {
+    try {
+      print('🗑️ Deleting report: $id');
+      await supabase.client.from('scout_reports').delete().eq('id', id);
+      await loadReports(); // Refresh list
+      return true;
+    } catch (e) {
+      print('❌ Error deleting report: $e');
+      return false;
+    }
   }
 }
 
 final scoutReportsProvider = NotifierProvider<ScoutReportsViewModel, ScoutReportsState>(() {
   return ScoutReportsViewModel();
+});
+
+final reportByIdProvider = FutureProvider.family<ScoutReport?, String>((ref, id) async {
+  try {
+    print('🔍 Fetching report by ID: $id');
+    final response = await supabase.client
+        .from('scout_reports')
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+
+    if (response == null) {
+      print('⚠️ Report not found for ID: $id');
+      return null;
+    }
+
+    print('✅ Report found: ${response['player_name']}');
+    return ScoutReport.fromJson(response as Map<String, dynamic>);
+  } catch (e) {
+    print('❌ Error fetching report by ID ($id): $e');
+    return null;
+  }
 });

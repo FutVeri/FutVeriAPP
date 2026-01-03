@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:futveri/core/supabase/supabase_client.dart';
+import 'package:futveri/features/scout/domain/scout_report.dart';
 import 'package:uuid/uuid.dart';
 
 /// State for the Create Report Form - matches backend scout_reports table exactly
@@ -49,6 +50,7 @@ class CreateReportState {
   final List<String> imageUrls;
   
   // Meta
+  final String? editingReportId;
   final bool isSubmitting;
   final String? errorMessage;
 
@@ -88,6 +90,7 @@ class CreateReportState {
     this.notes = '',
     this.imageUrls = const [],
     
+    this.editingReportId,
     this.isSubmitting = false,
     this.errorMessage,
   }) : matchDate = matchDate ?? DateTime.now();
@@ -128,9 +131,11 @@ class CreateReportState {
     String? notes,
     List<String>? imageUrls,
     
+    String? editingReportId,
     bool? isSubmitting,
     String? errorMessage,
     bool clearError = false,
+    bool clearEditing = false,
   }) {
     return CreateReportState(
       playerName: playerName ?? this.playerName,
@@ -168,6 +173,7 @@ class CreateReportState {
       notes: notes ?? this.notes,
       imageUrls: imageUrls ?? this.imageUrls,
       
+      editingReportId: clearEditing ? null : (editingReportId ?? this.editingReportId),
       isSubmitting: isSubmitting ?? this.isSubmitting,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
@@ -220,6 +226,37 @@ class CreateReportViewModel extends Notifier<CreateReportState> {
   void removeImage(int index) {
     final images = [...state.imageUrls]..removeAt(index);
     state = state.copyWith(imageUrls: images);
+  }
+
+  void initWithReport(ScoutReport report) {
+    state = CreateReportState(
+      editingReportId: report.id,
+      playerName: report.playerName,
+      playerPosition: report.playerPosition,
+      playerAge: report.playerAge,
+      playerTeam: report.playerTeam,
+      matchDate: report.matchDate,
+      rivalTeam: report.rivalTeam,
+      score: report.score,
+      minutePlayed: report.minutePlayed,
+      matchType: report.matchType,
+      physicalRating: report.physicalRating,
+      physicalDescription: report.physicalDescription,
+      technicalRating: report.technicalRating,
+      technicalDescription: report.technicalDescription,
+      tacticalRating: report.tacticalRating,
+      tacticalDescription: report.tacticalDescription,
+      mentalRating: report.mentalRating,
+      mentalDescription: report.mentalDescription,
+      overallRating: report.overallRating,
+      potentialRating: report.potentialRating,
+      strengths: report.strengths,
+      weaknesses: report.weaknesses,
+      risks: report.risks,
+      recommendedRole: report.recommendedRole,
+      description: report.description ?? '',
+      imageUrls: report.imageUrls,
+    );
   }
 
   Future<String?> submitReport() async {
@@ -303,12 +340,21 @@ class CreateReportViewModel extends Notifier<CreateReportState> {
         'updated_at': DateTime.now().toIso8601String(),
       };
       
-      print('📋 Report data prepared, inserting...');
-      await supabase.client.from('scout_reports').insert(reportData);
+      print('📋 Report data prepared, submitting...');
+      
+      if (state.editingReportId != null) {
+        print('📋 Updating existing report: ${state.editingReportId}');
+        await supabase.client
+            .from('scout_reports')
+            .update(reportData)
+            .eq('id', state.editingReportId!);
+      } else {
+        print('📋 Inserting new report: $reportId');
+        await supabase.client.from('scout_reports').insert(reportData);
+      }
       
       state = state.copyWith(isSubmitting: false);
-      print('✅ Report saved successfully: $reportId');
-      return reportId;
+      return state.editingReportId ?? reportId;
     } catch (e) {
       state = state.copyWith(
         isSubmitting: false,

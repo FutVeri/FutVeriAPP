@@ -12,6 +12,8 @@ class Post {
   final DateTime createdAt;
   final bool isLiked;
 
+  final String? reportId;
+
   const Post({
     required this.id,
     required this.scoutId,
@@ -25,6 +27,7 @@ class Post {
     required this.commentCount,
     required this.createdAt,
     this.isLiked = false,
+    this.reportId,
   });
 
   Post copyWith({
@@ -40,6 +43,7 @@ class Post {
     int? commentCount,
     DateTime? createdAt,
     bool? isLiked,
+    String? reportId,
   }) {
     return Post(
       id: id ?? this.id,
@@ -54,6 +58,28 @@ class Post {
       commentCount: commentCount ?? this.commentCount,
       createdAt: createdAt ?? this.createdAt,
       isLiked: isLiked ?? this.isLiked,
+      reportId: reportId ?? this.reportId,
+    );
+  }
+  factory Post.fromJson(Map<String, dynamic> json) {
+    // Handle scout name from nested user object if it exists
+    final scoutData = json['users'] as Map<String, dynamic>?;
+    final scoutName = scoutData?['name'] as String? ?? 'Bilinmeyen Scout';
+
+    return Post(
+      id: json['id'] as String,
+      scoutId: json['scout_id'] as String,
+      scoutName: scoutName,
+      playerName: json['player_name'] as String? ?? 'Bilinmeyen Oyuncu',
+      playerInfo: json['player_info'] as String? ?? '',
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+      comment: json['comment'] as String? ?? '',
+      imageUrls: (json['image_urls'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      likes: json['likes_count'] as int? ?? 0,
+      commentCount: json['comments_count'] as int? ?? 0,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      isLiked: false, // This would need a separate favorites/likes table check
+      reportId: json['report_id'] as String?,
     );
   }
 }

@@ -5,9 +5,10 @@ part 'scout_report.g.dart';
 
 @freezed
 abstract class ScoutReport with _$ScoutReport {
+  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory ScoutReport({
     required String id,
-    required String playerId,
+    String? playerId,
     required String playerName,
     required String playerPosition,
     required int playerAge,
@@ -49,8 +50,8 @@ abstract class ScoutReport with _$ScoutReport {
     // Meta
     required String scoutId,
     required DateTime createdAt,
-    required String description,
-    required List<String> imageUrls,
+    String? description,
+    @Default([]) List<String> imageUrls,
     @Default('draft') String status, // draft, submitted, approved
   }) = _ScoutReport;
 

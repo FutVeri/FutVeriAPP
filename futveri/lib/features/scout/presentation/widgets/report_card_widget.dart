@@ -105,7 +105,7 @@ class ReportCardWidget extends StatelessWidget {
             ),
             Gap(16.h),
             Text(
-              report.description,
+              report.description ?? '',
               style: TextStyle(
                 fontSize: 14.sp,
                 color: Colors.white70,

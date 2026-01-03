@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:futveri/core/theme/app_theme.dart';
 import 'package:futveri/features/scout/presentation/viewmodels/scout_reports_viewmodel.dart';
 import 'package:futveri/features/scout/presentation/widgets/report_card_widget.dart';
+import 'package:futveri/features/scout/presentation/viewmodels/create_report_viewmodel.dart';
 
 class ScoutDashboardPage extends ConsumerWidget {
   const ScoutDashboardPage({super.key});
@@ -27,24 +28,30 @@ class ScoutDashboardPage extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(LucideIcons.plusCircle),
-            onPressed: () => context.push('/create-report'),
+            onPressed: () {
+              ref.read(createReportProvider.notifier).reset();
+              context.push('/create-report');
+            },
           ),
         ],
       ),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.reports.isEmpty
-              ? _buildEmptyState(context)
+              ? _buildEmptyState(context, ref)
               : _buildReportsList(state),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/create-report'),
+        onPressed: () {
+          ref.read(createReportProvider.notifier).reset();
+          context.push('/create-report');
+        },
         backgroundColor: AppTheme.primaryGreen,
         child: const Icon(LucideIcons.filePlus, color: Colors.black),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 40.w),
@@ -84,7 +91,10 @@ class ScoutDashboardPage extends ConsumerWidget {
             ),
             Gap(32.h),
             SSurfaceButton(
-              onPressed: () => context.push('/create-report'),
+              onPressed: () {
+                ref.read(createReportProvider.notifier).reset();
+                context.push('/create-report');
+              },
               child: const Text('Create Your First Report'),
             ),
           ],
