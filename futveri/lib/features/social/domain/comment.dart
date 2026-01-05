@@ -21,7 +21,7 @@ class Comment {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       userName: userName,
-      text: json['comment_text'] as String,
+      text: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }

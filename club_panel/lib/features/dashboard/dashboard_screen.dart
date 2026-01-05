@@ -19,11 +19,17 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
-  DashboardStats _stats = const DashboardStats(
+  DashboardStats _stats = DashboardStats(
     totalPlayers: 0,
-    totalReports: 0,
     activeScouts: 0,
+    totalReports: 0,
     monthlyReports: 0,
+    pendingReports: 0,
+    approvedTransfers: 0,
+    onlineScouts: 0,
+    weeklyActivity: List.generate(7, (_) => 0),
+    apiResponseMs: 0,
+    dbStatus: true,
   );
   List<ScoutReport> _recentReports = [];
 
@@ -36,19 +42,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _loadDashboardData() async {
     setState(() => _isLoading = true);
     try {
-      // Fetch stats
-      final results = await Future.wait([
-        supabase.client.from('players').select('id', const FetchOptions(count: CountOption.exact)),
-        supabase.client.from('scout_reports').select('id', const FetchOptions(count: CountOption.exact)),
-        supabase.client.from('users').select('id', const FetchOptions(count: CountOption.exact)).eq('role', 'scout').eq('is_active', true),
-        supabase.client.from('scout_reports').select().order('created_at', ascending: false).limit(5),
-      ]);
-
-      final playersCount = (results[0] as PostgrestResponse).count ?? 0;
-      final reportsCount = (results[1] as PostgrestResponse).count ?? 0;
-      final scoutsCount = (results[2] as PostgrestResponse).count ?? 0;
+      // Fetch stats using working select().count() pattern
+      final playersResponse = await supabase.client.from('players').select().count();
+      final reportsResponse = await supabase.client.from('scout_reports').select().count();
+      final scoutsResponse = await supabase.client
+          .from('users')
+          .select()
+          .eq('role', 'scout')
+          .eq('is_active', true)
+          .count();
       
-      final reportsData = results[3] as List;
+      final recentReportsResponse = await supabase.client
+          .from('scout_reports')
+          .select()
+          .order('created_at', ascending: false)
+          .limit(5);
+
+      final int playersCount = playersResponse.count ?? 0;
+      final int reportsCount = reportsResponse.count ?? 0;
+      final int scoutsCount = scoutsResponse.count ?? 0;
+
+      final reportsData = recentReportsResponse as List;
       final reports = reportsData.map((data) {
         return ScoutReport(
           id: data['id'] as String,
@@ -60,21 +74,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
           currentClub: data['player_team'] as String,
           createdAt: DateTime.parse(data['created_at'] as String),
           status: _parseStatus(data['status']),
-          physical: RatingDetails(value: data['physical_rating'] as int, description: ''),
-          technical: RatingDetails(value: data['technical_rating'] as int, description: ''),
-          tactical: RatingDetails(value: data['tactical_rating'] as int, description: ''),
-          mental: RatingDetails(value: data['mental_rating'] as int, description: ''),
-          overall: RatingDetails(value: (data['overall_rating'] as num).round(), description: ''),
-          potential: RatingDetails(value: (data['potential_rating'] as num).round(), description: ''),
+          physical: RatingDetails(value: (data['physical_rating'] as num?)?.toInt() ?? 0, description: ''),
+          technical: RatingDetails(value: (data['technical_rating'] as num?)?.toInt() ?? 0, description: ''),
+          tactical: RatingDetails(value: (data['tactical_rating'] as num?)?.toInt() ?? 0, description: ''),
+          mental: RatingDetails(value: (data['mental_rating'] as num?)?.toInt() ?? 0, description: ''),
+          overall: RatingDetails(value: (data['overall_rating'] as num?)?.toInt() ?? 0, description: ''),
+          potential: RatingDetails(value: (data['potential_rating'] as num?)?.toInt() ?? 0, description: ''),
         );
       }).toList();
 
       setState(() {
         _stats = DashboardStats(
           totalPlayers: playersCount,
-          totalReports: reportsCount,
           activeScouts: scoutsCount,
-          monthlyReports: 0, // Simplified for now
+          totalReports: reportsCount,
+          monthlyReports: 0,
+          pendingReports: 0,
+          approvedTransfers: 0,
+          onlineScouts: 0,
+          weeklyActivity: List.generate(7, (_) => (reportsCount / 7).round()),
           dbStatus: true,
           apiResponseMs: 120,
         );

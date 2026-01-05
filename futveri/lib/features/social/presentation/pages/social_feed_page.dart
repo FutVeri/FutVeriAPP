@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:futveri/features/social/presentation/widgets/feed_post_widget.dart';
 import 'package:futveri/features/social/presentation/widgets/feed_filter_sheet.dart';
+import 'package:futveri/features/social/presentation/viewmodels/social_feed_viewmodel.dart';
 import 'package:futveri/core/theme/app_theme.dart';
 import 'package:gap/gap.dart';
 
-class SocialFeedPage extends StatelessWidget {
+class SocialFeedPage extends ConsumerWidget {
   const SocialFeedPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final socialState = ref.watch(socialFeedProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('FutVeri Feed'),
@@ -68,35 +72,29 @@ class SocialFeedPage extends StatelessWidget {
           
           // Feed List
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: const [
-                FeedPostWidget(
-                  scoutName: 'Ahmet Yılmaz',
-                  playerName: 'Semih Kılıçsoy',
-                  playerInfo: 'Beşiktaş • FW • 19 yo',
-                  rating: 8.5,
-                  comment: 'Incredible finishing ability for his age. Needs to improve decision making in tight spaces.',
-                  likes: 124,
+            child: socialState.isLoading 
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: () => ref.read(socialFeedProvider.notifier).loadPosts(),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: socialState.posts.length,
+                    itemBuilder: (context, index) {
+                      final post = socialState.posts[index];
+                      return FeedPostWidget(
+                        postId: post.id,
+                        scoutName: post.scoutName,
+                        playerName: post.playerName,
+                        playerInfo: post.playerInfo,
+                        rating: post.rating,
+                        comment: post.comment,
+                        likes: post.likes,
+                        commentCount: post.commentCount,
+                        isLiked: post.isLiked,
+                      );
+                    },
+                  ),
                 ),
-                FeedPostWidget(
-                  scoutName: 'Global Scout',
-                  playerName: 'Can Uzun',
-                  playerInfo: 'FC Nürnberg • CAM • 18 yo',
-                  rating: 9.0,
-                  comment: 'Top class vision. A true number 10 potential.',
-                  likes: 350,
-                ),
-                FeedPostWidget(
-                  scoutName: 'FutVeri Analytics',
-                  playerName: 'Enis Destan',
-                  playerInfo: 'Trabzonspor • ST • 21 yo',
-                  rating: 7.8,
-                  comment: 'Strong aerial ability. Holding play is developing well.',
-                  likes: 89,
-                ),
-              ],
-            ),
           ),
         ],
       ),

@@ -9,6 +9,8 @@ class MockDataService {
     return const DashboardStats(
       totalPlayers: 156,
       activeScouts: 12,
+      totalReports: 250,
+      monthlyReports: 45,
       pendingReports: 8,
       approvedTransfers: 3,
       onlineScouts: 5,

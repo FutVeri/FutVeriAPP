@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:futveri/core/theme/app_theme.dart';
 import 'package:futveri/features/profile/presentation/widgets/profile_list_item.dart';
+import 'package:futveri/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Profile'),
@@ -25,7 +29,7 @@ class ProfilePage extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 20.h),
         child: Column(
           children: [
-            _buildProfileHeader(),
+            _buildProfileHeader(authState),
             Gap(32.h),
             _buildSection(
               title: 'Account',
@@ -73,20 +77,16 @@ class ProfilePage extends StatelessWidget {
               items: [
                 ProfileListItem(
                   icon: LucideIcons.logIn,
-                  title: 'Sign In / Register',
+                  title: 'Giriş Yap / Kayıt Ol',
                   onTap: () => context.push('/login'),
                 ),
-                ProfileListItem(
-                  icon: LucideIcons.logOut,
-                  title: 'Logout',
-                  iconColor: AppTheme.errorRed,
-                  onTap: () {
-                    // Mock logout
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Logged out successfully')),
-                    );
-                  },
-                ),
+                if (authState.isAuthenticated)
+                  ProfileListItem(
+                    icon: LucideIcons.logOut,
+                    title: 'Çıkış Yap',
+                    iconColor: AppTheme.errorRed,
+                    onTap: () => _confirmLogout(context, ref),
+                  ),
               ],
             ),
             Gap(24.h),
@@ -124,7 +124,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(AuthState authState) {
     return Column(
       children: [
         Stack(
@@ -157,7 +157,7 @@ class ProfilePage extends StatelessWidget {
         ),
         Gap(16.h),
         Text(
-          'Emre Mert',
+          authState.userName ?? 'Misafir Kullanıcı',
           style: TextStyle(
             fontSize: 24.sp,
             fontWeight: FontWeight.bold,
@@ -165,13 +165,14 @@ class ProfilePage extends StatelessWidget {
           ),
         ),
         Gap(4.h),
-        Text(
-          'emre@futveri.com',
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: AppTheme.textGrey,
+        if (authState.isAuthenticated)
+          Text(
+            authState.userEmail ?? '',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: AppTheme.textGrey,
+            ),
           ),
-        ),
         Gap(12.h),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
@@ -224,6 +225,39 @@ class ProfilePage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.surfaceDark,
+        title: const Text('Çıkış Yap', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
+          style: TextStyle(color: AppTheme.textGrey),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Vazgeç', style: TextStyle(color: AppTheme.textGrey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Çıkış Yap', style: TextStyle(color: AppTheme.errorRed)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(authProvider.notifier).logout();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Başarıyla çıkış yapıldı')),
+        );
+      }
+    }
   }
 
   void _showLicensePage(BuildContext context) {

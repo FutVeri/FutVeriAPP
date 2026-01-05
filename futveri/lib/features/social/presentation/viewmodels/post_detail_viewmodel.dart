@@ -78,7 +78,22 @@ class PostDetailViewModel extends Notifier<PostDetailState> {
           .eq('id', _postId!)
           .single();
 
-      final post = Post.fromJson(postResponse);
+      final postData = Post.fromJson(postResponse);
+
+      // 1.1 Check if liked by current user
+      final user = supabase.auth.currentUser;
+      bool isLiked = false;
+      if (user != null) {
+        final likeCheck = await supabase.client
+            .from('likes')
+            .select()
+            .eq('post_id', _postId!)
+            .eq('user_id', user.id)
+            .maybeSingle();
+        isLiked = likeCheck != null;
+      }
+
+      final post = postData.copyWith(isLiked: isLiked);
 
       // 2. Fetch related ScoutReport if it exists
       ScoutReport? report;
@@ -99,7 +114,12 @@ class PostDetailViewModel extends Notifier<PostDetailState> {
           .order('created_at', ascending: false);
 
       final comments = (commentsResponse as List)
-          .map((c) => Comment.fromJson(c))
+          .map((c) {
+            if (c == (commentsResponse as List).first) {
+              print('📢 DEBUG: Comment keys: ${c.keys.toList()}');
+            }
+            return Comment.fromJson(c);
+          })
           .toList();
 
       state = state.copyWith(
@@ -117,14 +137,50 @@ class PostDetailViewModel extends Notifier<PostDetailState> {
     }
   }
 
-  void toggleLike() {
-    if (state.post == null) return;
+  Future<void> toggleLike() async {
+    if (state.post == null || _postId == null) return;
+    
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      state = state.copyWith(errorMessage: 'Beğenmek için giriş yapmalısınız');
+      return;
+    }
+
+    final wasLiked = state.post!.isLiked;
     final updatedPost = state.post!.copyWith(
-      isLiked: !state.post!.isLiked,
-      likes: state.post!.isLiked ? state.post!.likes - 1 : state.post!.likes + 1,
+      isLiked: !wasLiked,
+      likes: wasLiked ? state.post!.likes - 1 : state.post!.likes + 1,
     );
+    
     state = state.copyWith(post: updatedPost);
-    // TODO: Update in Supabase
+
+    try {
+      if (wasLiked) {
+        await supabase.client
+            .from('likes')
+            .delete()
+            .eq('post_id', _postId!)
+            .eq('user_id', user.id);
+        
+        // await supabase.client.rpc('decrement_post_likes', params: {'row_id': _postId!});
+      } else {
+        await supabase.client.from('likes').insert({
+          'post_id': _postId,
+          'user_id': user.id,
+        });
+
+        // await supabase.client.rpc('increment_post_likes', params: {'row_id': _postId!});
+      }
+    } catch (e) {
+      print('❌ Error toggling like: $e');
+      // Rollback
+      state = state.copyWith(
+        post: updatedPost.copyWith(
+          isLiked: wasLiked,
+          likes: wasLiked ? updatedPost.likes + 1 : updatedPost.likes - 1,
+        ),
+      );
+    }
   }
 
   void updateCommentText(String text) {
@@ -149,11 +205,14 @@ class PostDetailViewModel extends Notifier<PostDetailState> {
         'id': commentId,
         'post_id': _postId,
         'user_id': user.id,
-        'comment_text': text,
+        'content': text,
         'created_at': DateTime.now().toIso8601String(),
       };
 
       await supabase.client.from('comments').insert(commentData);
+      
+      // Increment comment count atomically - RPC missing, skipping for now
+      // await supabase.client.rpc('increment_post_comments', params: {'row_id': _postId!});
 
       // Refresh comments and clear input
       state = state.copyWith(newCommentText: '');
