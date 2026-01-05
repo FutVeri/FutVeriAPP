@@ -42,6 +42,13 @@ class SocialFeedNotifier extends Notifier<SocialFeedState> {
     try {
       print('📢 SocialFeed: Loading posts from Supabase...');
       
+      try {
+        final sampleComment = await supabase.client.from('comments').select().limit(1);
+        print('📢 DEBUG: Sample comment row: $sampleComment');
+      } catch (e) {
+        print('📢 DEBUG: Error fetching sample comment: $e');
+      }
+      
       // Try with join first
       final response = await supabase.client
           .from('posts')
@@ -89,11 +96,20 @@ class SocialFeedNotifier extends Notifier<SocialFeedState> {
             .select()
             .order('created_at', ascending: false);
         
-        print('📢 SocialFeed: Fallback returned ${fallbackResponse.length} posts');
-        
+        final user = supabase.auth.currentUser;
+        List<String> userLikedPostIds = [];
+        if (user != null) {
+          final likesResponse = await supabase.client
+              .from('likes')
+              .select('post_id')
+              .eq('user_id', user.id);
+          userLikedPostIds = (likesResponse as List).map((l) => l['post_id'] as String).toList();
+        }
+
         final postsArr = (fallbackResponse as List).map((data) {
+          final postId = data['id'] as String;
           return Post(
-            id: data['id'] as String,
+            id: postId,
             scoutId: data['scout_id'] as String,
             scoutName: 'Scout', // Fallback name
             playerName: data['player_name'] as String,
@@ -104,6 +120,7 @@ class SocialFeedNotifier extends Notifier<SocialFeedState> {
             likes: data['likes_count'] ?? 0,
             commentCount: data['comments_count'] ?? 0,
             createdAt: DateTime.parse(data['created_at'] as String),
+            isLiked: userLikedPostIds.contains(postId),
           );
         }).toList();
         state = state.copyWith(posts: postsArr, isLoading: false);
@@ -111,6 +128,55 @@ class SocialFeedNotifier extends Notifier<SocialFeedState> {
         print('❌ SocialFeed Fallback Error: $fallbackError');
         state = state.copyWith(isLoading: false, errorMessage: e.toString());
       }
+    }
+  }
+
+  Future<void> toggleLike(String postId) async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
+
+    final postIndex = state.posts.indexWhere((p) => p.id == postId);
+    if (postIndex == -1) return;
+
+    final post = state.posts[postIndex];
+    final wasLiked = post.isLiked;
+
+    // Optimistic UI update
+    final updatedPost = post.copyWith(
+      isLiked: !wasLiked,
+      likes: wasLiked ? post.likes - 1 : post.likes + 1,
+    );
+    final updatedPosts = List<Post>.from(state.posts);
+    updatedPosts[postIndex] = updatedPost;
+    state = state.copyWith(posts: updatedPosts);
+
+    try {
+      if (wasLiked) {
+        // Unlike
+        await supabase.client
+            .from('likes')
+            .delete()
+            .eq('post_id', postId)
+            .eq('user_id', user.id);
+        
+        // Decrement count - RPC missing
+        // await supabase.client.rpc('decrement_post_likes', params: {'row_id': postId});
+      } else {
+        // Like
+        await supabase.client.from('likes').insert({
+          'post_id': postId,
+          'user_id': user.id,
+        });
+
+        // Increment count - RPC missing
+        // await supabase.client.rpc('increment_post_likes', params: {'row_id': postId});
+      }
+    } catch (e) {
+      print('❌ Error toggling like: $e');
+      // Rollback on error
+      final rollbackPosts = List<Post>.from(state.posts);
+      rollbackPosts[postIndex] = post;
+      state = state.copyWith(posts: rollbackPosts);
     }
   }
 

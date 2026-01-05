@@ -172,15 +172,19 @@ class HomePage extends ConsumerWidget {
               ),
             )
           else
-            ...socialState.posts.map((post) => FeedPostWidget(
-              postId: post.id,
-              scoutName: post.scoutName,
-              playerName: post.playerName,
-              playerInfo: post.playerInfo,
-              rating: post.rating,
-              comment: post.comment,
-              likes: post.likes,
-            )),
+            ...socialState.posts.map((post) {
+                return FeedPostWidget(
+                  postId: post.id,
+                  scoutName: post.scoutName,
+                  playerName: post.playerName,
+                  playerInfo: post.playerInfo,
+                  rating: post.rating,
+                  comment: post.comment,
+                  likes: post.likes,
+                  commentCount: post.commentCount,
+                  isLiked: post.isLiked,
+                );
+            }),
           
           Gap(32.h),
           _buildCreateReportBanner(context),

@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:futveri/core/theme/app_theme.dart';
+import 'package:futveri/features/auth/presentation/viewmodels/auth_viewmodel.dart';
 
-class PersonalInfoPage extends StatelessWidget {
+class PersonalInfoPage extends ConsumerWidget {
   const PersonalInfoPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Personal Information')),
       body: SingleChildScrollView(
@@ -17,19 +21,19 @@ class PersonalInfoPage extends StatelessWidget {
           children: [
             _buildInfoCard(
               label: 'Display Name',
-              value: 'Emre Mert',
+              value: authState.userName ?? 'Giriş Yapılmadı',
               icon: LucideIcons.user,
             ),
             Gap(16.h),
             _buildInfoCard(
               label: 'Email Address',
-              value: 'emre@futveri.com',
+              value: authState.userEmail ?? 'Giriş Yapılmadı',
               icon: LucideIcons.mail,
             ),
             Gap(16.h),
             _buildInfoCard(
               label: 'Bio',
-              value: 'Professional Football Scout & Analyst. Passionate about identifying young talents.',
+              value: authState.userProfile?['bio'] ?? 'Henüz bir biyografi eklenmemiş.',
               icon: LucideIcons.fileText,
             ),
             Gap(32.h),
@@ -37,7 +41,9 @@ class PersonalInfoPage extends StatelessWidget {
               width: double.infinity,
               height: 56.h,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // TODO: Implement edit functionality
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryGreen,
                   foregroundColor: Colors.black,

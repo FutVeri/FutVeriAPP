@@ -7,6 +7,9 @@ class AuthState {
   final bool isAuthenticated;
   final bool isLoginMode;
   final String? userName;
+  final String? userEmail;
+  final String? userRole;
+  final Map<String, dynamic>? userProfile;
 
   AuthState({
     this.isLoading = false,
@@ -14,6 +17,9 @@ class AuthState {
     this.isAuthenticated = false,
     this.isLoginMode = true,
     this.userName,
+    this.userEmail,
+    this.userRole,
+    this.userProfile,
   });
 
   AuthState copyWith({
@@ -22,6 +28,9 @@ class AuthState {
     bool? isAuthenticated,
     bool? isLoginMode,
     String? userName,
+    String? userEmail,
+    String? userRole,
+    Map<String, dynamic>? userProfile,
     bool clearError = false,
   }) {
     return AuthState(
@@ -30,6 +39,9 @@ class AuthState {
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isLoginMode: isLoginMode ?? this.isLoginMode,
       userName: userName ?? this.userName,
+      userEmail: userEmail ?? this.userEmail,
+      userRole: userRole ?? this.userRole,
+      userProfile: userProfile ?? this.userProfile,
     );
   }
 }
@@ -43,6 +55,9 @@ class AuthViewModel extends Notifier<AuthState> {
     return AuthState(
       isAuthenticated: supabaseAuth.isAuthenticated,
       userName: supabaseAuth.userName,
+      userEmail: supabaseAuth.user?.email,
+      userRole: supabaseAuth.userRole,
+      userProfile: supabaseAuth.userProfile,
       isLoading: supabaseAuth.isLoading,
       error: supabaseAuth.errorMessage,
     );
