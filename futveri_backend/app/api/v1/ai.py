@@ -240,7 +240,7 @@ async def get_statistics(
 async def sync_data(
     full: bool = False,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(["admin", "superadmin"]))
+    current_user: User = Depends(require_roles("admin", "superadmin"))
 ):
     """
     Supabase'den local veri havuzuna senkronizasyon.
@@ -287,7 +287,7 @@ async def sync_data(
 @router.post("/sync/simple", response_model=SyncResponse)
 async def sync_data_simple(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles(["admin", "superadmin"]))
+    current_user: User = Depends(require_roles("admin", "superadmin"))
 ):
     """
     Basit senkronizasyon (özet oluşturmadan).

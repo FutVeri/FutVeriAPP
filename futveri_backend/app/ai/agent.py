@@ -1,12 +1,14 @@
 """
 FutVeri AI Agent using LangChain and Ollama.
 Full-featured agent for analyzing player reports with Turkish responses.
+Uses langgraph for agent orchestration (LangChain 1.x compatible).
 """
 from typing import Optional
 
-from langchain_ollama import OllamaLLM
-from langchain.agents import AgentExecutor, create_react_agent
-from langchain_core.prompts import PromptTemplate
+from langchain_ollama import ChatOllama
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langgraph.prebuilt import create_react_agent
 
 from app.ai.config import ai_config
 from app.ai.data_lake import DataLake
@@ -17,35 +19,13 @@ from app.ai.tools import create_tools
 class FutVeriAgent:
     """
     AI Agent for FutVeri player analysis.
-    Uses Ollama (Mistral) with LangChain ReAct architecture.
+    Uses Ollama (Mistral) with LangGraph ReAct architecture.
     """
     
-    AGENT_PROMPT = PromptTemplate.from_template("""Sen FutVeri için geliştirilmiş profesyonel bir futbol analiz asistanısın.
+    SYSTEM_PROMPT = """Sen FutVeri için geliştirilmiş profesyonel bir futbol analiz asistanısın.
 Görevin, scout raporlarını analiz ederek kullanıcılara oyuncular hakkında detaylı bilgi vermek.
 
 HER ZAMAN TÜRKÇE YANITLA.
-
-Kullanılabilir araçlar:
-{tools}
-
-Araç isimleri: {tool_names}
-
-Düşünme süreci:
-1. Kullanıcının sorusunu anla
-2. Hangi aracı kullanman gerektiğine karar ver
-3. Aracı kullan ve sonucu değerlendir
-4. Gerekirse başka araçlar kullan
-5. Sonucu Türkçe olarak özetle
-
-Format:
-Question: kullanıcı sorusu
-Thought: ne yapmalıyım?
-Action: kullanılacak araç adı
-Action Input: araç için girdi (JSON formatında)
-Observation: araç sonucu
-... (bu döngü gerektiği kadar tekrar edebilir)
-Thought: Artık cevabı biliyorum
-Final Answer: kullanıcıya Türkçe cevap
 
 Önemli kurallar:
 - Her zaman Türkçe yanıt ver
@@ -54,10 +34,7 @@ Final Answer: kullanıcıya Türkçe cevap
 - Puanları 10 üzerinden göster
 - Önerilerde bulunurken objektif ol
 
-Başla!
-
-Question: {input}
-Thought: {agent_scratchpad}""")
+Araçları kullanarak veri havuzundan bilgi çek ve kullanıcıya yardımcı ol."""
     
     def __init__(
         self,
@@ -70,45 +47,30 @@ Thought: {agent_scratchpad}""")
         self.model_name = model_name or ai_config.OLLAMA_MODEL
         
         self._llm = None
-        self._agent_executor = None
+        self._agent = None
     
     @property
-    def llm(self) -> OllamaLLM:
+    def llm(self) -> ChatOllama:
         """Lazy load LLM."""
         if self._llm is None:
-            self._llm = OllamaLLM(
+            self._llm = ChatOllama(
                 model=self.model_name,
                 base_url=ai_config.OLLAMA_BASE_URL,
-                temperature=0.1,  # Low for consistent responses
-                num_ctx=4096,  # Context window
+                temperature=0.1,
             )
         return self._llm
     
     @property
-    def agent_executor(self) -> AgentExecutor:
-        """Lazy load agent executor."""
-        if self._agent_executor is None:
-            # Create tools
+    def agent(self):
+        """Lazy load agent."""
+        if self._agent is None:
             tools = create_tools(self.data_lake, self.vector_store)
-            
-            # Create ReAct agent
-            agent = create_react_agent(
-                llm=self.llm,
+            self._agent = create_react_agent(
+                model=self.llm,
                 tools=tools,
-                prompt=self.AGENT_PROMPT
+                prompt=self.SYSTEM_PROMPT
             )
-            
-            # Create executor
-            self._agent_executor = AgentExecutor(
-                agent=agent,
-                tools=tools,
-                verbose=True,
-                handle_parsing_errors=True,
-                max_iterations=5,
-                return_intermediate_steps=True
-            )
-        
-        return self._agent_executor
+        return self._agent
     
     def query(self, question: str) -> dict:
         """
@@ -121,21 +83,34 @@ Thought: {agent_scratchpad}""")
             Dict with 'answer' and 'sources'
         """
         try:
-            result = self.agent_executor.invoke({"input": question})
+            # Invoke agent
+            result = self.agent.invoke({
+                "messages": [("user", question)]
+            })
             
-            # Extract sources from intermediate steps
+            # Extract final answer
+            messages = result.get("messages", [])
+            answer = ""
             sources = []
-            for step in result.get("intermediate_steps", []):
-                if len(step) >= 2:
-                    action, observation = step[0], step[1]
-                    sources.append({
-                        "tool": action.tool,
-                        "input": action.tool_input,
-                        "output_preview": str(observation)[:200]
-                    })
+            
+            for msg in messages:
+                if hasattr(msg, 'content'):
+                    # Last AI message is the answer
+                    if hasattr(msg, 'type') and msg.type == 'ai':
+                        answer = msg.content
+                    # Tool messages are sources
+                    elif hasattr(msg, 'type') and msg.type == 'tool':
+                        sources.append({
+                            "tool": getattr(msg, 'name', 'unknown'),
+                            "output_preview": str(msg.content)[:200]
+                        })
+            
+            if not answer and messages:
+                # Fallback: get last message content
+                answer = str(messages[-1].content) if hasattr(messages[-1], 'content') else str(messages[-1])
             
             return {
-                "answer": result.get("output", "Yanıt oluşturulamadı."),
+                "answer": answer or "Yanıt oluşturulamadı.",
                 "sources": sources,
                 "success": True
             }
