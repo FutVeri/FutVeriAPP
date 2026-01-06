@@ -5,17 +5,21 @@ import 'package:gap/gap.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/glassmorphism.dart';
 import '../../models/scout_report.dart';
-import '../../services/mock_data_service.dart';
+import '../../services/supabase_data_service.dart';
 import 'report_detail_dialog.dart';
 
 // Reports state
 class ReportsState {
   final List<ScoutReport> reports;
   final String filter;
+  final bool isLoading;
+  final String? error;
 
   const ReportsState({
     required this.reports,
     this.filter = 'all',
+    this.isLoading = false,
+    this.error,
   });
 
   List<ScoutReport> get filteredReports {
@@ -23,43 +27,67 @@ class ReportsState {
     return reports.where((r) => r.status == filter).toList();
   }
 
-  ReportsState copyWith({List<ScoutReport>? reports, String? filter}) {
+  ReportsState copyWith({
+    List<ScoutReport>? reports, 
+    String? filter,
+    bool? isLoading,
+    String? error,
+  }) {
     return ReportsState(
       reports: reports ?? this.reports,
       filter: filter ?? this.filter,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
     );
   }
 }
 
-// Reports notifier
-class ReportsNotifier extends Notifier<ReportsState> {
+// Reports notifier with Supabase integration
+class ReportsNotifier extends AsyncNotifier<ReportsState> {
   @override
-  ReportsState build() {
-    return ReportsState(reports: MockDataService().getScoutReports());
+  Future<ReportsState> build() async {
+    final supabaseService = ref.read(supabaseDataServiceProvider);
+    final reports = await supabaseService.getScoutReports();
+    return ReportsState(reports: reports);
   }
 
   void setFilter(String filter) {
-    state = state.copyWith(filter: filter);
+    if (state.hasValue) {
+      state = AsyncData(state.value!.copyWith(filter: filter));
+    }
+  }
+
+  Future<void> refreshReports() async {
+    state = const AsyncLoading();
+    final supabaseService = ref.read(supabaseDataServiceProvider);
+    final reports = await supabaseService.getScoutReports();
+    state = AsyncData(ReportsState(reports: reports));
   }
 
   void approveReport(String id) {
-    final updated = state.reports.map((r) {
-      if (r.id == id) return r.copyWith(status: 'approved');
-      return r;
-    }).toList();
-    state = state.copyWith(reports: updated);
+    if (state.hasValue) {
+      final updated = state.value!.reports.map((r) {
+        if (r.id == id) return r.copyWith(status: 'approved');
+        return r;
+      }).toList();
+      state = AsyncData(state.value!.copyWith(reports: updated));
+      // TODO: Update in Supabase
+    }
   }
 
   void rejectReport(String id) {
-    final updated = state.reports.map((r) {
-      if (r.id == id) return r.copyWith(status: 'rejected');
-      return r;
-    }).toList();
-    state = state.copyWith(reports: updated);
+    if (state.hasValue) {
+      final updated = state.value!.reports.map((r) {
+        if (r.id == id) return r.copyWith(status: 'rejected');
+        return r;
+      }).toList();
+      state = AsyncData(state.value!.copyWith(reports: updated));
+      // TODO: Update in Supabase
+    }
   }
 }
 
-final reportsProvider = NotifierProvider<ReportsNotifier, ReportsState>(() {
+final reportsProvider = AsyncNotifierProvider<ReportsNotifier, ReportsState>(() {
   return ReportsNotifier();
 });
 
@@ -68,8 +96,7 @@ class ReportsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reportsState = ref.watch(reportsProvider);
-    final reports = reportsState.filteredReports;
+    final reportsAsync = ref.watch(reportsProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -101,178 +128,225 @@ class ReportsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-              ],
-            ),
-            const Gap(24),
-            // Filter chips
-            Row(
-              children: [
-                _buildFilterChip(
-                  context,
-                  ref,
-                  'Tümü',
-                  'all',
-                  reportsState.filter,
-                  reportsState.reports.length,
-                ),
-                const Gap(8),
-                _buildFilterChip(
-                  context,
-                  ref,
-                  'Bekleyen',
-                  'submitted',
-                  reportsState.filter,
-                  reportsState.reports.where((r) => r.status == 'submitted').length,
-                ),
-                const Gap(8),
-                _buildFilterChip(
-                  context,
-                  ref,
-                  'Onaylı',
-                  'approved',
-                  reportsState.filter,
-                  reportsState.reports.where((r) => r.status == 'approved').length,
-                ),
-                const Gap(8),
-                _buildFilterChip(
-                  context,
-                  ref,
-                  'Reddedildi',
-                  'rejected',
-                  reportsState.filter,
-                  reportsState.reports.where((r) => r.status == 'rejected').length,
+                const Spacer(),
+                // Refresh button
+                IconButton(
+                  icon: const Icon(LucideIcons.refreshCw, color: AppTheme.primaryGreen),
+                  tooltip: 'Yenile',
+                  onPressed: () => ref.read(reportsProvider.notifier).refreshReports(),
                 ),
               ],
             ),
             const Gap(24),
-            // Reports table
+            // Content based on state
             Expanded(
-              child: GlassCard(
-                padding: const EdgeInsets.all(0),
-                child: reports.isEmpty
-                    ? const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(LucideIcons.inbox, color: AppTheme.textGrey, size: 48),
-                            Gap(16),
-                            Text(
-                              'Bu kategoride rapor bulunamadı',
-                              style: TextStyle(color: AppTheme.textGrey),
-                            ),
-                          ],
-                        ),
-                      )
-                    : SingleChildScrollView(
-                        child: DataTable(
-                          columnSpacing: 24,
-                          horizontalMargin: 20,
-                          headingRowHeight: 56,
-                          dataRowMinHeight: 64,
-                          dataRowMaxHeight: 64,
-                          columns: const [
-                            DataColumn(label: Text('Oyuncu')),
-                            DataColumn(label: Text('Pozisyon')),
-                            DataColumn(label: Text('Takım')),
-                            DataColumn(label: Text('Scout')),
-                            DataColumn(label: Text('Tarih')),
-                            DataColumn(label: Text('Puan')),
-                            DataColumn(label: Text('Durum')),
-                            DataColumn(label: Text('İşlemler')),
-                          ],
-                          rows: reports.map((report) {
-                            return DataRow(
-                              cells: [
-                                DataCell(
-                                  Row(
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 16,
-                                        backgroundColor:
-                                            AppTheme.primaryGreen.withValues(alpha: 0.2),
-                                        child: Text(
-                                          report.playerName[0],
-                                          style: const TextStyle(
-                                            color: AppTheme.primaryGreen,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
-                                      const Gap(10),
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            report.playerName,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Yaş: ${report.playerAge}',
-                                            style: const TextStyle(
-                                              color: AppTheme.textGrey,
-                                              fontSize: 11,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                DataCell(Text(report.playerPosition)),
-                                DataCell(Text(report.playerTeam)),
-                                DataCell(Text(report.scoutName)),
-                                DataCell(Text(_formatDate(report.createdAt))),
-                                DataCell(_buildRatingBadge(report.overallRating)),
-                                DataCell(_buildStatusBadge(report.status)),
-                                DataCell(
-                                  Row(
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(LucideIcons.eye, size: 18),
-                                        color: AppTheme.textGrey,
-                                        tooltip: 'Detay',
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (_) => ReportDetailDialog(report: report),
-                                          );
-                                        },
-                                      ),
-                                      if (report.status == 'submitted') ...[
-                                        IconButton(
-                                          icon: const Icon(LucideIcons.check, size: 18),
-                                          color: AppTheme.successGreen,
-                                          tooltip: 'Onayla',
-                                          onPressed: () {
-                                            ref.read(reportsProvider.notifier).approveReport(report.id);
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(LucideIcons.x, size: 18),
-                                          color: AppTheme.errorRed,
-                                          tooltip: 'Reddet',
-                                          onPressed: () {
-                                            ref.read(reportsProvider.notifier).rejectReport(report.id);
-                                          },
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
+              child: reportsAsync.when(
+                loading: () => const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(color: AppTheme.primaryGreen),
+                      Gap(16),
+                      Text('Raporlar yükleniyor...', style: TextStyle(color: AppTheme.textGrey)),
+                    ],
+                  ),
+                ),
+                error: (error, stack) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(LucideIcons.alertTriangle, color: AppTheme.errorRed, size: 48),
+                      const Gap(16),
+                      Text('Hata: $error', style: const TextStyle(color: AppTheme.errorRed)),
+                      const Gap(16),
+                      ElevatedButton(
+                        onPressed: () => ref.read(reportsProvider.notifier).refreshReports(),
+                        child: const Text('Tekrar Dene'),
                       ),
+                    ],
+                  ),
+                ),
+                data: (reportsState) => _buildReportsContent(context, ref, reportsState),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildReportsContent(BuildContext context, WidgetRef ref, ReportsState reportsState) {
+    final reports = reportsState.filteredReports;
+    
+    return Column(
+      children: [
+        // Filter chips
+        Row(
+          children: [
+            _buildFilterChip(
+              context,
+              ref,
+              'Tümü',
+              'all',
+              reportsState.filter,
+              reportsState.reports.length,
+            ),
+            const Gap(8),
+            _buildFilterChip(
+              context,
+              ref,
+              'Bekleyen',
+              'submitted',
+              reportsState.filter,
+              reportsState.reports.where((r) => r.status == 'submitted').length,
+            ),
+            const Gap(8),
+            _buildFilterChip(
+              context,
+              ref,
+              'Onaylı',
+              'approved',
+              reportsState.filter,
+              reportsState.reports.where((r) => r.status == 'approved').length,
+            ),
+            const Gap(8),
+            _buildFilterChip(
+              context,
+              ref,
+              'Reddedildi',
+              'rejected',
+              reportsState.filter,
+              reportsState.reports.where((r) => r.status == 'rejected').length,
+            ),
+          ],
+        ),
+        const Gap(24),
+        // Reports table
+        Expanded(
+          child: GlassCard(
+            padding: const EdgeInsets.all(0),
+            child: reports.isEmpty
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(LucideIcons.inbox, color: AppTheme.textGrey, size: 48),
+                        Gap(16),
+                        Text(
+                          'Bu kategoride rapor bulunamadı',
+                          style: TextStyle(color: AppTheme.textGrey),
+                        ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
+                    child: DataTable(
+                      columnSpacing: 24,
+                      horizontalMargin: 20,
+                      headingRowHeight: 56,
+                      dataRowMinHeight: 64,
+                      dataRowMaxHeight: 64,
+                      columns: const [
+                        DataColumn(label: Text('Oyuncu')),
+                        DataColumn(label: Text('Pozisyon')),
+                        DataColumn(label: Text('Takım')),
+                        DataColumn(label: Text('Scout')),
+                        DataColumn(label: Text('Tarih')),
+                        DataColumn(label: Text('Puan')),
+                        DataColumn(label: Text('Durum')),
+                        DataColumn(label: Text('İşlemler')),
+                      ],
+                      rows: reports.map((report) {
+                        return DataRow(
+                          cells: [
+                            DataCell(
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor:
+                                        AppTheme.primaryGreen.withValues(alpha: 0.2),
+                                    child: Text(
+                                      report.playerName.isNotEmpty ? report.playerName[0] : '?',
+                                      style: const TextStyle(
+                                        color: AppTheme.primaryGreen,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  const Gap(10),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        report.playerName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Yaş: ${report.playerAge}',
+                                        style: const TextStyle(
+                                          color: AppTheme.textGrey,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            DataCell(Text(report.playerPosition)),
+                            DataCell(Text(report.playerTeam)),
+                            DataCell(Text(report.scoutName)),
+                            DataCell(Text(_formatDate(report.createdAt))),
+                            DataCell(_buildRatingBadge(report.overallRating)),
+                            DataCell(_buildStatusBadge(report.status)),
+                            DataCell(
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(LucideIcons.eye, size: 18),
+                                    color: AppTheme.textGrey,
+                                    tooltip: 'Detay',
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) => ReportDetailDialog(report: report),
+                                      );
+                                    },
+                                  ),
+                                  if (report.status == 'submitted') ...[
+                                    IconButton(
+                                      icon: const Icon(LucideIcons.check, size: 18),
+                                      color: AppTheme.successGreen,
+                                      tooltip: 'Onayla',
+                                      onPressed: () {
+                                        ref.read(reportsProvider.notifier).approveReport(report.id);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(LucideIcons.x, size: 18),
+                                      color: AppTheme.errorRed,
+                                      tooltip: 'Reddet',
+                                      onPressed: () {
+                                        ref.read(reportsProvider.notifier).rejectReport(report.id);
+                                      },
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 

@@ -121,6 +121,11 @@ class AuthViewModel extends Notifier<AuthState> {
     }
   }
 
+  Future<void> refreshUserProfile() async {
+    final authNotifier = ref.read(supabaseAuthProvider.notifier);
+    await authNotifier.refreshProfile();
+  }
+
   Future<void> logout() async {
     final authNotifier = ref.read(supabaseAuthProvider.notifier);
     await authNotifier.signOut();

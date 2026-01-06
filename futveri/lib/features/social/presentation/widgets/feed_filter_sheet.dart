@@ -86,7 +86,7 @@ class _FeedFilterSheetState extends State<FeedFilterSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Age Range
-                    _buildSectionTitle('Player Age'),
+                    _buildSectionTitle('Yaş'),
                     Gap(12.h),
                     _buildRangeSlider(
                       'Age',
@@ -99,7 +99,7 @@ class _FeedFilterSheetState extends State<FeedFilterSheet> {
                     Gap(24.h),
 
                     // Market Value Range
-                    _buildSectionTitle('Market Value'),
+                    _buildSectionTitle('Piyasa Değeri'),
                     Gap(12.h),
                     _buildRangeSlider(
                       'Market Value',
@@ -112,7 +112,7 @@ class _FeedFilterSheetState extends State<FeedFilterSheet> {
                     Gap(24.h),
 
                     // Minimum Rating
-                    _buildSectionTitle('Minimum Rating'),
+                    _buildSectionTitle('Minimum Değerlendirme'),
                     Gap(12.h),
                     _buildSingleSlider(
                       'Rating',
@@ -124,7 +124,7 @@ class _FeedFilterSheetState extends State<FeedFilterSheet> {
                     Gap(24.h),
 
                     // Position Filter
-                    _buildSectionTitle('Position'),
+                    _buildSectionTitle('Pozisyon'),
                     Gap(12.h),
                     _buildPositionChips(),
                     Gap(32.h),

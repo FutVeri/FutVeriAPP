@@ -12,44 +12,140 @@ class FeatureAccessPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    final isPremium = (authState.userRole?.toUpperCase() ?? 'FREE USER') != 'FREE USER' && authState.isAuthenticated;
+    final isPremium = (authState.userRole?.toUpperCase() ?? 'FREE') != 'FREE' && authState.isAuthenticated;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Feature Access')),
-      body: ListView(
-        padding: EdgeInsets.all(20.w),
+      appBar: AppBar(title: const Text('Özellik Erişimi')),
+      body: Column(
         children: [
-          _buildAccessItem(
-            icon: LucideIcons.search,
-            title: 'Player Search',
-            status: authState.isAuthenticated ? 'Enabled' : 'Login Required',
-            desc: 'Find players from all major leagues.',
-            enabled: authState.isAuthenticated,
+          // Current Plan Banner
+          Container(
+            width: double.infinity,
+            margin: EdgeInsets.all(20.w),
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: isPremium 
+                  ? Colors.amber.withOpacity(0.1)
+                  : AppTheme.primaryGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isPremium 
+                    ? Colors.amber.withOpacity(0.3)
+                    : AppTheme.primaryGreen.withOpacity(0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isPremium ? LucideIcons.crown : LucideIcons.user,
+                  color: isPremium ? Colors.amber : AppTheme.primaryGreen,
+                  size: 24.sp,
+                ),
+                Gap(12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        authState.isAuthenticated 
+                            ? (isPremium ? 'Premium Üye' : 'Ücretsiz Kullanıcı')
+                            : 'Misafir',
+                        style: TextStyle(
+                          color: isPremium ? Colors.amber : AppTheme.primaryGreen,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.sp,
+                        ),
+                      ),
+                      Text(
+                        isPremium 
+                            ? 'Tüm özelliklere erişebilirsiniz'
+                            : 'Temel özellikleri kullanabilirsiniz',
+                        style: TextStyle(
+                          color: AppTheme.textGrey,
+                          fontSize: 12.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          Gap(16.h),
-          _buildAccessItem(
-            icon: LucideIcons.fileText,
-            title: 'Scout Reporting',
-            status: authState.isAuthenticated ? 'Enabled' : 'Login Required',
-            desc: 'Create and export detailed analysis.',
-            enabled: authState.isAuthenticated,
-          ),
-          Gap(16.h),
-          _buildAccessItem(
-            icon: LucideIcons.barChart3,
-            title: 'Simulation Engine',
-            status: isPremium ? 'Enabled' : 'Premium Only',
-            desc: 'Simulate match scenarios and performance.',
-            isPremium: true,
-            enabled: isPremium,
-          ),
-          Gap(16.h),
-          _buildAccessItem(
-            icon: LucideIcons.users,
-            title: 'Team Management',
-            status: authState.isAuthenticated ? 'Enabled' : 'Login Required',
-            desc: 'Organize your scouted talents.',
-            enabled: authState.isAuthenticated,
+          
+          // Feature List
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              children: [
+                _buildAccessItem(
+                  icon: LucideIcons.search,
+                  title: 'Oyuncu Arama',
+                  status: authState.isAuthenticated ? 'Aktif' : 'Giriş Gerekli',
+                  desc: 'Tüm büyük liglerden oyuncuları bulun.',
+                  enabled: authState.isAuthenticated,
+                ),
+                Gap(12.h),
+                _buildAccessItem(
+                  icon: LucideIcons.fileText,
+                  title: 'Scout Raporlama',
+                  status: authState.isAuthenticated ? 'Aktif' : 'Giriş Gerekli',
+                  desc: 'Detaylı analiz oluşturun ve dışa aktarın.',
+                  enabled: authState.isAuthenticated,
+                ),
+                Gap(12.h),
+                _buildAccessItem(
+                  icon: LucideIcons.share2,
+                  title: 'Rapor Paylaşımı',
+                  status: authState.isAuthenticated ? 'Aktif' : 'Giriş Gerekli',
+                  desc: 'ScoutHub\'da raporlarınızı paylaşın.',
+                  enabled: authState.isAuthenticated,
+                ),
+                Gap(12.h),
+                _buildAccessItem(
+                  icon: LucideIcons.bot,
+                  title: 'AI Maç Analizi',
+                  status: isPremium ? 'Aktif' : 'Premium',
+                  desc: 'Yapay zeka destekli rakip analizi.',
+                  isPremium: true,
+                  enabled: isPremium,
+                ),
+                Gap(12.h),
+                _buildAccessItem(
+                  icon: LucideIcons.barChart3,
+                  title: 'Simülasyon Motoru',
+                  status: isPremium ? 'Aktif' : 'Premium',
+                  desc: 'Maç senaryoları ve performans simülasyonu.',
+                  isPremium: true,
+                  enabled: isPremium,
+                ),
+                Gap(12.h),
+                _buildAccessItem(
+                  icon: LucideIcons.users,
+                  title: 'Takım Yönetimi',
+                  status: authState.isAuthenticated ? 'Aktif' : 'Giriş Gerekli',
+                  desc: 'Keşfettiğiniz yetenekleri organize edin.',
+                  enabled: authState.isAuthenticated,
+                ),
+                Gap(12.h),
+                _buildAccessItem(
+                  icon: LucideIcons.download,
+                  title: 'PDF Dışa Aktarma',
+                  status: isPremium ? 'Aktif' : 'Premium',
+                  desc: 'Profesyonel PDF raporları indirin.',
+                  isPremium: true,
+                  enabled: isPremium,
+                ),
+                Gap(12.h),
+                _buildAccessItem(
+                  icon: LucideIcons.trophy,
+                  title: 'Liderlik Tablosu',
+                  status: 'Aktif',
+                  desc: 'Global sıralamada yerinizi görün.',
+                  enabled: true,
+                ),
+                Gap(24.h),
+              ],
+            ),
           ),
         ],
       ),
@@ -64,22 +160,41 @@ class FeatureAccessPage extends ConsumerWidget {
     bool isPremium = false,
     bool enabled = false,
   }) {
+    final statusColor = enabled 
+        ? AppTheme.primaryGreen 
+        : (isPremium ? Colors.amber : Colors.orange);
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppTheme.surfaceDark,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isPremium && enabled ? Colors.amber.withOpacity(0.3) : Colors.white.withOpacity(0.05),
+          color: enabled 
+              ? (isPremium ? Colors.amber.withOpacity(0.3) : AppTheme.primaryGreen.withOpacity(0.2))
+              : Colors.white.withOpacity(0.05),
         ),
       ),
       child: Opacity(
-        opacity: enabled ? 1.0 : 0.5,
+        opacity: enabled ? 1.0 : 0.6,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: isPremium ? Colors.amber : AppTheme.primaryGreen, size: 24.sp),
-            Gap(16.w),
+            Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: (isPremium ? Colors.amber : AppTheme.primaryGreen).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon, 
+                color: enabled 
+                    ? (isPremium ? Colors.amber : AppTheme.primaryGreen)
+                    : AppTheme.textGrey, 
+                size: 22.sp,
+              ),
+            ),
+            Gap(14.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,26 +202,47 @@ class FeatureAccessPage extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                        decoration: BoxDecoration(
-                          color: (isPremium ? Colors.amber : AppTheme.primaryGreen).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
+                      Text(
+                        title, 
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 15.sp,
+                          color: enabled ? Colors.white : AppTheme.textGrey,
                         ),
-                        child: Text(
-                          status,
-                          style: TextStyle(
-                            color: isPremium ? Colors.amber : AppTheme.primaryGreen,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (enabled)
+                              Icon(LucideIcons.check, size: 12.sp, color: statusColor),
+                            if (enabled) Gap(4.w),
+                            Text(
+                              status,
+                              style: TextStyle(
+                                color: statusColor,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                   Gap(4.h),
-                  Text(desc, style: const TextStyle(color: AppTheme.textGrey, fontSize: 13)),
+                  Text(
+                    desc, 
+                    style: TextStyle(
+                      color: AppTheme.textGrey, 
+                      fontSize: 12.sp,
+                    ),
+                  ),
                 ],
               ),
             ),

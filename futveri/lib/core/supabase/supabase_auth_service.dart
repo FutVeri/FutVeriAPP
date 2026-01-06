@@ -187,6 +187,14 @@ class SupabaseAuthNotifier extends Notifier<SupabaseAuthState> {
   }
 
 
+  /// Refresh user profile from database
+  Future<void> refreshProfile() async {
+    final user = supabase.currentUser;
+    if (user != null) {
+      await _loadUserProfile(user);
+    }
+  }
+
   /// Sign out
   Future<void> signOut() async {
     await supabase.auth.signOut();
