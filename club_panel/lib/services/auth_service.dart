@@ -88,7 +88,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = state.copyWith(
         currentClub: Club(
           id: 'club1',
-          name: 'Galatasaray SK',
+          name: 'Ümraniye SK',
           email: email,
           city: 'İstanbul',
           country: 'Türkiye',
