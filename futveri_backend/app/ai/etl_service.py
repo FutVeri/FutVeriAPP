@@ -140,7 +140,7 @@ class ETLService:
             # Get reports updated since last sync
             query = select(ScoutReport).where(
                 ScoutReport.updated_at > last_sync,
-                ScoutReport.status == "approved"
+                ScoutReport.status.in_(["approved", "submitted"])
             )
             result = await db.execute(query)
             reports = result.scalars().all()
@@ -224,7 +224,7 @@ class ETLService:
     async def _extract_reports(self, db: AsyncSession) -> list[ScoutReport]:
         """Extract approved reports from database."""
         query = select(ScoutReport).where(
-            ScoutReport.status == "approved"
+            ScoutReport.status.in_(["approved", "submitted"])
         ).order_by(ScoutReport.created_at.desc())
         
         result = await db.execute(query)
@@ -240,7 +240,9 @@ class ETLService:
         Returns dict keyed by player_name.
         """
         # Build query
-        query = select(ScoutReport).where(ScoutReport.status == "approved")
+        query = select(ScoutReport).where(
+            ScoutReport.status.in_(["approved", "submitted"])
+        )
         if player_names:
             query = query.where(ScoutReport.player_name.in_(player_names))
         
