@@ -29,3 +29,20 @@ python-dateutil>=2.9.0
 # Development
 pytest>=8.3.0
 pytest-asyncio>=0.24.0
+
+# AI & LLM
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-ollama>=0.2.0
+
+# Vector Store
+chromadb>=0.4.22
+
+# Local Database for Data Lake
+duckdb>=0.9.2
+
+# Embeddings (lightweight, works offline)
+sentence-transformers>=2.2.2
+
+# Async scheduling for ETL
+apscheduler>=3.10.4
