@@ -6,7 +6,6 @@ import 'package:futveri/features/social/presentation/pages/social_feed_page.dart
 import 'package:futveri/features/social/presentation/pages/post_detail_page.dart';
 import 'package:futveri/features/auth/presentation/pages/login_page.dart';
 import 'package:futveri/features/scout/presentation/pages/scout_dashboard_page.dart';
-import 'package:futveri/features/simulation/presentation/pages/simulation_page.dart';
 import 'package:futveri/features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/personal_info_page.dart';
 import '../../features/profile/presentation/pages/notifications_page.dart';
@@ -16,12 +15,14 @@ import '../../features/profile/presentation/pages/terms_page.dart';
 import '../../features/profile/presentation/pages/feature_access_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/widgets/home_modules.dart';
+import '../../features/simulation/presentation/pages/ai_simulation_page.dart';
 import '../widgets/scaffold_with_navbar.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
 final _shellNavigatorScoutKey = GlobalKey<NavigatorState>(debugLabel: 'shellScout');
-final _shellNavigatorSimKey = GlobalKey<NavigatorState>(debugLabel: 'shellSim');
+final _shellNavigatorAiKey = GlobalKey<NavigatorState>(debugLabel: 'shellAi');
+final _shellNavigatorLeaderboardKey = GlobalKey<NavigatorState>(debugLabel: 'shellLeaderboard');
 final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
 final router = GoRouter(
@@ -53,17 +54,27 @@ final router = GoRouter(
             ),
           ],
         ),
-        // Tab 3: Simulation
+        // Tab 3: AI Analysis (Center)
         StatefulShellBranch(
-          navigatorKey: _shellNavigatorSimKey,
+          navigatorKey: _shellNavigatorAiKey,
           routes: [
             GoRoute(
-              path: '/simulation',
-              builder: (context, state) => const SimulationPage(),
+              path: '/ai-analysis',
+              builder: (context, state) => const AiSimulationPage(),
             ),
           ],
         ),
-        // Tab 4: Profile
+        // Tab 4: Leaderboard
+        StatefulShellBranch(
+          navigatorKey: _shellNavigatorLeaderboardKey,
+          routes: [
+            GoRoute(
+              path: '/leaderboard',
+              builder: (context, state) => const LeaderboardPage(),
+            ),
+          ],
+        ),
+        // Tab 5: Profile
         StatefulShellBranch(
           navigatorKey: _shellNavigatorProfileKey,
           routes: [
@@ -78,7 +89,7 @@ final router = GoRouter(
     // Full Screen Routes (Outside Shell)
     GoRoute(
       path: '/create-report',
-      parentNavigatorKey: _rootNavigatorKey, // Hides bottom bar
+      parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const CreateReportPage(),
     ),
     GoRoute(
@@ -133,19 +144,10 @@ final router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/ai-analysis',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const AiAnalysisPage(),
-    ),
-    GoRoute(
       path: '/popular-feed',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const PopularFeedPage(),
     ),
-    GoRoute(
-      path: '/leaderboard',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const LeaderboardPage(),
-    ),
   ],
 );
+

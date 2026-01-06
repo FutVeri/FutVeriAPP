@@ -17,7 +17,7 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: const Text('Profilim'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.settings),
@@ -32,48 +32,49 @@ class ProfilePage extends ConsumerWidget {
             _buildProfileHeader(authState),
             Gap(32.h),
             _buildSection(
-              title: 'Account',
+              title: 'Hesap',
               items: [
                 ProfileListItem(
                   icon: LucideIcons.user,
-                  title: 'Personal Information',
-                  subtitle: 'Update your profile details',
+                  title: 'Kişisel Bilgiler',
+                  subtitle: 'Profil detaylarını güncelle',
                   onTap: () => context.push('/profile/info'),
                 ),
                 ProfileListItem(
                   icon: LucideIcons.bell,
-                  title: 'Notifications',
-                  subtitle: 'Manage your alerts',
+                  title: 'Bildirimler',
+                  subtitle: 'Uyarıları yönet',
                   onTap: () => context.push('/profile/notifications'),
                 ),
                 ProfileListItem(
                   icon: LucideIcons.lock,
-                  title: 'Privacy & Security',
+                  title: 'Gizlilik ve Güvenlik',
                   onTap: () => context.push('/profile/security'),
                 ),
               ],
             ),
             Gap(24.h),
             _buildSection(
-              title: 'Membership',
+              title: 'Üyelik',
               items: [
                 ProfileListItem(
                   icon: LucideIcons.award,
-                  title: 'Premium Subscription',
-                  subtitle: 'Active until Jan 2026',
+                  title: 'Bireysel Abonelik',
+                  subtitle: authState.isAuthenticated ? 'Ücretsiz plan kullanılıyor' : 'Avantajları gör',
                   iconColor: Colors.amber,
                   onTap: () => context.push('/profile/premium'),
                 ),
                 ProfileListItem(
                   icon: LucideIcons.zap,
-                  title: 'Feature Access',
+                  title: 'Özellik Erişimi',
+                  subtitle: 'Hangi özelliklere erişebilirsin?',
                   onTap: () => context.push('/profile/features'),
                 ),
               ],
             ),
             Gap(24.h),
             _buildSection(
-              title: 'Authentication',
+              title: 'Oturum',
               items: [
                 ProfileListItem(
                   icon: LucideIcons.logIn,
@@ -91,21 +92,21 @@ class ProfilePage extends ConsumerWidget {
             ),
             Gap(24.h),
             _buildSection(
-              title: 'Application',
+              title: 'Uygulama',
               items: [
                 ProfileListItem(
                   icon: LucideIcons.bookOpen,
-                  title: 'Licenses',
+                  title: 'Lisanslar',
                   onTap: () => _showLicensePage(context),
                 ),
                 ProfileListItem(
                   icon: LucideIcons.shieldCheck,
-                  title: 'Terms of Service',
+                  title: 'Kullanım Şartları',
                   onTap: () => context.push('/profile/terms'),
                 ),
                 ProfileListItem(
                   icon: LucideIcons.info,
-                  title: 'Version',
+                  title: 'Versiyon',
                   trailing: Text(
                     '1.0.0',
                     style: TextStyle(
@@ -177,16 +178,22 @@ class ProfilePage extends ConsumerWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
           decoration: BoxDecoration(
-            color: AppTheme.primaryGreen.withOpacity(0.1),
+            color: authState.isAuthenticated 
+                ? AppTheme.primaryGreen.withOpacity(0.1)
+                : Colors.grey.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppTheme.primaryGreen.withOpacity(0.3)),
+            border: Border.all(
+              color: authState.isAuthenticated 
+                  ? AppTheme.primaryGreen.withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.3),
+            ),
           ),
           child: Text(
-            'PRO SCOUT',
+            authState.isAuthenticated ? 'ÜCRETSİZ KULLANICI' : 'MİSAFİR',
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.bold,
-              color: AppTheme.primaryGreen,
+              color: authState.isAuthenticated ? AppTheme.primaryGreen : Colors.grey,
               letterSpacing: 1.2,
             ),
           ),
