@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:futveri/core/theme/app_theme.dart';
+import 'package:futveri/features/home/data/league_models.dart';
+import 'package:futveri/features/home/data/league_mock_data.dart';
 
 class AiAnalysisCard extends StatelessWidget {
   final VoidCallback onTap;
@@ -200,18 +202,46 @@ class LeaderboardSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final league = getMockLeague();
+    final top3 = league.podium;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Text(
-            'Scout Leaderboard',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Scout Ligi',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    '${league.remainingDays} gün kaldı',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: AppTheme.primaryGreen,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                'Tümünü Gör',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppTheme.primaryGreen,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ),
         Gap(12.h),
@@ -223,37 +253,39 @@ class LeaderboardSection extends StatelessWidget {
             border: Border.all(color: Colors.white.withOpacity(0.05)),
           ),
           child: Column(
-            children: List.generate(3, (index) => _buildLeaderboardItem(index)),
+            children: top3.map((member) => _buildLeaderboardItem(member)).toList(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildLeaderboardItem(int index) {
+  Widget _buildLeaderboardItem(LeagueMember member) {
     final colors = [
       const Color(0xFFFFD700), // Gold
       const Color(0xFFC0C0C0), // Silver
       const Color(0xFFCD7F32), // Bronze
     ];
+    final color = colors[member.rank - 1];
+    final isLast = member.rank == 3;
 
     return Padding(
-      padding: EdgeInsets.only(bottom: index != 2 ? 16.h : 0),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 16.h),
       child: Row(
         children: [
           Container(
             width: 24.w,
             height: 24.w,
             decoration: BoxDecoration(
-              color: colors[index].withOpacity(0.2),
+              color: color.withOpacity(0.2),
               shape: BoxShape.circle,
-              border: Border.all(color: colors[index], width: 1.5),
+              border: Border.all(color: color, width: 1.5),
             ),
             child: Center(
               child: Text(
-                '${index + 1}',
+                '${member.rank}',
                 style: TextStyle(
-                  color: colors[index],
+                  color: color,
                   fontWeight: FontWeight.bold,
                   fontSize: 12.sp,
                 ),
@@ -264,23 +296,38 @@ class LeaderboardSection extends StatelessWidget {
           CircleAvatar(
             radius: 18.r,
             backgroundColor: Colors.white10,
-            child: Icon(LucideIcons.user, size: 18.sp, color: Colors.white70),
+            child: Text(
+              member.name.split(' ').map((n) => n[0]).join(),
+              style: TextStyle(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white70,
+              ),
+            ),
           ),
           Gap(12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'ScoutUser_${99 - index}',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      member.name,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                    ...member.badges.map((badge) => Padding(
+                      padding: EdgeInsets.only(left: 4.w),
+                      child: Text(badge.type.emoji, style: TextStyle(fontSize: 10.sp)),
+                    )),
+                  ],
                 ),
                 Text(
-                  '${45 - index * 5} Reports',
+                  '${member.reportCount} Rapor',
                   style: TextStyle(
                     color: AppTheme.textGrey,
                     fontSize: 12.sp,
@@ -290,7 +337,7 @@ class LeaderboardSection extends StatelessWidget {
             ),
           ),
           Text(
-            '${1250 - index * 100} pts',
+            '${member.points}',
             style: TextStyle(
               color: AppTheme.primaryGreen,
               fontWeight: FontWeight.bold,
@@ -377,33 +424,41 @@ class LeaderboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get mock league data
+    final league = getMockLeague();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Global Leaderboard')),
+      appBar: AppBar(
+        title: Text(league.name),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.info),
+            onPressed: () => _showLeagueInfo(context),
+          ),
+        ],
+      ),
       body: Column(
         children: [
-          Container(
-            padding: EdgeInsets.all(24.w),
-            color: AppTheme.surfaceDark,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildPodiumItem('User 2', 'Silver', Colors.grey),
-                _buildPodiumItem('User 1', 'Gold', const Color(0xFFFFD700), isCenter: true),
-                _buildPodiumItem('User 3', 'Bronze', const Color(0xFFCD7F32)),
-              ],
-            ),
+          // League header with remaining time
+          _buildLeagueHeader(league),
+          
+          // Podium for top 3
+          _buildPodium(league.podium, context),
+          
+          // Divider
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Divider(color: Colors.white.withOpacity(0.1)),
           ),
+          
+          // Rest of the members (4-30)
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.all(20.w),
-              itemCount: 20,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              itemCount: league.otherMembers.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  leading: Text('#${index + 4}', style: const TextStyle(color: AppTheme.textGrey)),
-                  title: Text('Scout_User_${index + 4}', style: const TextStyle(color: Colors.white)),
-                  subtitle: Text('${1000 - index * 20} points', style: const TextStyle(color: AppTheme.textGrey)),
-                  trailing: const Icon(LucideIcons.chevronRight, color: Colors.white24),
-                );
+                return _buildMemberTile(league.otherMembers[index], context);
               },
             ),
           ),
@@ -412,14 +467,558 @@ class LeaderboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPodiumItem(String name, String rank, Color color, {bool isCenter = false}) {
-    return Column(
-      children: [
-        Icon(LucideIcons.trophy, color: color, size: isCenter ? 48.sp : 32.sp),
-        Gap(8.h),
-        Text(name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: isCenter ? 16.sp : 14.sp)),
-        Text(rank, style: TextStyle(color: AppTheme.textGrey, fontSize: 12.sp)),
-      ],
+  Widget _buildLeagueHeader(League league) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      margin: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.primaryGreen.withOpacity(0.2),
+            AppTheme.primaryGreen.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primaryGreen.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '🏆 ${league.period}',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Gap(4.h),
+              Text(
+                '30 Scout • Aylık Yarışma',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppTheme.textGrey,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(LucideIcons.clock, size: 16.sp, color: AppTheme.primaryGreen),
+                Gap(6.w),
+                Text(
+                  '${league.remainingDays} gün kaldı',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryGreen,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPodium(List<LeagueMember> podium, BuildContext context) {
+    if (podium.length < 3) return const SizedBox.shrink();
+    
+    final second = podium.firstWhere((m) => m.rank == 2);
+    final first = podium.firstWhere((m) => m.rank == 1);
+    final third = podium.firstWhere((m) => m.rank == 3);
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _buildPodiumItem(second, const Color(0xFFC0C0C0), 80.h, context),
+          _buildPodiumItem(first, const Color(0xFFFFD700), 100.h, context, isFirst: true),
+          _buildPodiumItem(third, const Color(0xFFCD7F32), 60.h, context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPodiumItem(LeagueMember member, Color color, double height, BuildContext context, {bool isFirst = false}) {
+    return GestureDetector(
+      onTap: () => _showMemberDetail(member, context),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Avatar with crown for first place
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                padding: EdgeInsets.all(3.w),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: color, width: 2),
+                ),
+                child: CircleAvatar(
+                  radius: isFirst ? 32.r : 26.r,
+                  backgroundColor: color.withOpacity(0.2),
+                  child: Text(
+                    member.name.split(' ').map((n) => n[0]).join(),
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: isFirst ? 16.sp : 14.sp,
+                    ),
+                  ),
+                ),
+              ),
+              if (isFirst)
+                Positioned(
+                  top: -12,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Text('👑', style: TextStyle(fontSize: 20.sp)),
+                  ),
+                ),
+            ],
+          ),
+          Gap(8.h),
+          // Name
+          Text(
+            member.name.split(' ')[0],
+            style: TextStyle(
+              fontSize: isFirst ? 14.sp : 12.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Gap(2.h),
+          // Points
+          Text(
+            '${member.points} puan',
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Gap(8.h),
+          // Podium base
+          Container(
+            width: 70.w,
+            height: height,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  color.withOpacity(0.4),
+                  color.withOpacity(0.2),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(8.r),
+                topRight: Radius.circular(8.r),
+              ),
+            ),
+            child: Center(
+              child: Text(
+                '${member.rank}',
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMemberTile(LeagueMember member, BuildContext context) {
+    final isCurrentUser = member.isCurrentUser;
+    
+    return GestureDetector(
+      onTap: () => _showMemberDetail(member, context),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: isCurrentUser 
+              ? AppTheme.primaryGreen.withOpacity(0.15)
+              : AppTheme.surfaceDark,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isCurrentUser 
+                ? AppTheme.primaryGreen.withOpacity(0.5)
+                : Colors.white.withOpacity(0.05),
+          ),
+        ),
+        child: Row(
+          children: [
+            // Rank
+            SizedBox(
+              width: 32.w,
+              child: Text(
+                '#${member.rank}',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: isCurrentUser ? AppTheme.primaryGreen : AppTheme.textGrey,
+                ),
+              ),
+            ),
+            Gap(12.w),
+            // Avatar
+            CircleAvatar(
+              radius: 18.r,
+              backgroundColor: Colors.white.withOpacity(0.1),
+              child: Text(
+                member.name.split(' ').map((n) => n[0]).join(),
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white70,
+                ),
+              ),
+            ),
+            Gap(12.w),
+            // Name and reports
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        member.name,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: isCurrentUser ? AppTheme.primaryGreen : Colors.white,
+                        ),
+                      ),
+                      if (isCurrentUser) ...[
+                        Gap(6.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryGreen.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'SEN',
+                            style: TextStyle(
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryGreen,
+                            ),
+                          ),
+                        ),
+                      ],
+                      // Badges
+                      ...member.badges.map((badge) => Padding(
+                        padding: EdgeInsets.only(left: 4.w),
+                        child: Text(badge.type.emoji, style: TextStyle(fontSize: 12.sp)),
+                      )),
+                    ],
+                  ),
+                  Text(
+                    '${member.reportCount} rapor',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: AppTheme.textGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Points
+            Text(
+              '${member.points}',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+                color: isCurrentUser ? AppTheme.primaryGreen : Colors.white,
+              ),
+            ),
+            Gap(4.w),
+            Text(
+              'puan',
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: AppTheme.textGrey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMemberDetail(LeagueMember member, BuildContext context) {
+    final rankColors = {
+      1: const Color(0xFFFFD700),
+      2: const Color(0xFFC0C0C0),
+      3: const Color(0xFFCD7F32),
+    };
+    final rankColor = rankColors[member.rank] ?? AppTheme.primaryGreen;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surfaceDark,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40.w,
+              height: 4.h,
+              margin: EdgeInsets.only(bottom: 20.h),
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Avatar
+            Container(
+              padding: EdgeInsets.all(4.w),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: member.rank <= 3 ? rankColor : Colors.white24,
+                  width: 3,
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 40.r,
+                backgroundColor: (member.rank <= 3 ? rankColor : Colors.white).withOpacity(0.2),
+                child: Text(
+                  member.name.split(' ').map((n) => n[0]).join(),
+                  style: TextStyle(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.bold,
+                    color: member.rank <= 3 ? rankColor : Colors.white70,
+                  ),
+                ),
+              ),
+            ),
+            Gap(16.h),
+            // Name
+            Text(
+              member.name,
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Gap(8.h),
+            // Rank badge
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: rankColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: rankColor.withOpacity(0.4)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (member.rank <= 3)
+                    Text(
+                      member.rank == 1 ? '🥇' : member.rank == 2 ? '🥈' : '🥉',
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
+                  if (member.rank <= 3) Gap(6.w),
+                  Text(
+                    '#${member.rank}. Sıra',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: rankColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Gap(24.h),
+            // Stats grid
+            Row(
+              children: [
+                Expanded(child: _buildStatCard('🏆', 'Puan', '${member.points}')),
+                Gap(12.w),
+                Expanded(child: _buildStatCard('📝', 'Rapor', '${member.reportCount}')),
+                Gap(12.w),
+                Expanded(child: _buildStatCard('🎯', 'Rozet', '${member.badges.length}')),
+              ],
+            ),
+            // Badges section if has badges
+            if (member.badges.isNotEmpty) ...[
+              Gap(20.h),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Kazanılan Rozetler',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Gap(12.h),
+              Wrap(
+                spacing: 8.w,
+                runSpacing: 8.h,
+                children: member.badges.map((badge) => Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: _getBadgeColor(badge.type).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _getBadgeColor(badge.type).withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(badge.type.emoji, style: TextStyle(fontSize: 16.sp)),
+                      Gap(6.w),
+                      Text(
+                        badge.leaguePeriod,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: _getBadgeColor(badge.type),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                )).toList(),
+              ),
+            ],
+            Gap(24.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String emoji, String label, String value) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Column(
+        children: [
+          Text(emoji, style: TextStyle(fontSize: 24.sp)),
+          Gap(8.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          Gap(4.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: AppTheme.textGrey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getBadgeColor(LeagueBadgeType type) {
+    switch (type) {
+      case LeagueBadgeType.gold:
+        return const Color(0xFFFFD700);
+      case LeagueBadgeType.silver:
+        return const Color(0xFFC0C0C0);
+      case LeagueBadgeType.bronze:
+        return const Color(0xFFCD7F32);
+    }
+  }
+
+  void _showLeagueInfo(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surfaceDark,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Lig Sistemi Hakkında',
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Gap(16.h),
+            _buildInfoRow('🏆', 'Her ligde 30 scout yarışır'),
+            _buildInfoRow('📅', 'Lig süresi: 1 ay'),
+            _buildInfoRow('🥇', 'Birinci: Altın rozet'),
+            _buildInfoRow('🥈', 'İkinci: Gümüş rozet'),
+            _buildInfoRow('🥉', 'Üçüncü: Bronz rozet'),
+            _buildInfoRow('⭐', 'Rozetler profilinizde görünür'),
+            Gap(24.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String emoji, String text) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12.h),
+      child: Row(
+        children: [
+          Text(emoji, style: TextStyle(fontSize: 18.sp)),
+          Gap(12.w),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: AppTheme.textGrey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+

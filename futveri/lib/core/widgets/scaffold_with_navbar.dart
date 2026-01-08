@@ -109,7 +109,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
               : null,
         ),
         child: Icon(
-          LucideIcons.bot,
+          LucideIcons.gamepad2,
           color: Colors.white,
           size: 26.sp,
         ),
