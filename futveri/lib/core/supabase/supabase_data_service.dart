@@ -185,7 +185,93 @@ class SupabaseDataService {
       };
     }
   }
+  
+  // ============================================================
+  // LEAGUE SYSTEM - Future Supabase Integration
+  // Uncomment these methods when ready to connect to Supabase
+  // ============================================================
+  
+  // /// Get league members for current month
+  // /// Table: league_members (id, user_id, league_id, points, report_count, rank)
+  // Future<List<Map<String, dynamic>>> getLeagueMembers({
+  //   required String leagueId,
+  //   int limit = 30,
+  // }) async {
+  //   final response = await supabase.client
+  //       .from('league_members')
+  //       .select('*, users(*)')
+  //       .eq('league_id', leagueId)
+  //       .order('points', ascending: false)
+  //       .limit(limit);
+  //   
+  //   return List<Map<String, dynamic>>.from(response);
+  // }
+  
+  // /// Get user's earned badges
+  // /// Table: league_badges (id, user_id, badge_type, earned_at, league_period)
+  // Future<List<Map<String, dynamic>>> getUserBadges(String userId) async {
+  //   final response = await supabase.client
+  //       .from('league_badges')
+  //       .select()
+  //       .eq('user_id', userId)
+  //       .order('earned_at', ascending: false);
+  //   
+  //   return List<Map<String, dynamic>>.from(response);
+  // }
+  
+  // /// Award badge to top 3 finishers at end of month
+  // /// badgeType: 'gold', 'silver', 'bronze'
+  // Future<void> awardBadge({
+  //   required String userId,
+  //   required String badgeType,
+  //   required String leaguePeriod,
+  // }) async {
+  //   await supabase.client.from('league_badges').insert({
+  //     'user_id': userId,
+  //     'badge_type': badgeType,
+  //     'league_period': leaguePeriod,
+  //     'earned_at': DateTime.now().toIso8601String(),
+  //   });
+  // }
+  
+  // /// Get current active league
+  // /// Table: leagues (id, name, period, start_date, end_date)
+  // Future<Map<String, dynamic>?> getCurrentLeague() async {
+  //   final now = DateTime.now().toIso8601String();
+  //   final response = await supabase.client
+  //       .from('leagues')
+  //       .select()
+  //       .lte('start_date', now)
+  //       .gte('end_date', now)
+  //       .maybeSingle();
+  //   
+  //   return response;
+  // }
+  
+  // /// Update user's league points (called after report submission)
+  // Future<void> updateLeaguePoints({
+  //   required String userId,
+  //   required String leagueId,
+  //   required int pointsToAdd,
+  // }) async {
+  //   // Get current points
+  //   final current = await supabase.client
+  //       .from('league_members')
+  //       .select('points')
+  //       .eq('user_id', userId)
+  //       .eq('league_id', leagueId)
+  //       .maybeSingle();
+  //   
+  //   final currentPoints = (current?['points'] ?? 0) as int;
+  //   
+  //   await supabase.client.from('league_members').upsert({
+  //     'user_id': userId,
+  //     'league_id': leagueId,
+  //     'points': currentPoints + pointsToAdd,
+  //   });
+  // }
 }
 
 /// Global data service instance
 final supabaseData = SupabaseDataService.instance;
+

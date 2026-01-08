@@ -15,7 +15,9 @@ import '../../features/profile/presentation/pages/terms_page.dart';
 import '../../features/profile/presentation/pages/feature_access_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/widgets/home_modules.dart';
-import '../../features/simulation/presentation/pages/ai_simulation_page.dart';
+import '../../features/simulation/presentation/pages/simulation_page.dart';
+import '../../features/simulation/presentation/pages/team_selection_page.dart';
+import '../../features/simulation/presentation/pages/match_simulation_screen.dart';
 import '../widgets/scaffold_with_navbar.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -54,13 +56,13 @@ final router = GoRouter(
             ),
           ],
         ),
-        // Tab 3: AI Analysis (Center)
+        // Tab 3: Simulation (Center)
         StatefulShellBranch(
           navigatorKey: _shellNavigatorAiKey,
           routes: [
             GoRoute(
-              path: '/ai-analysis',
-              builder: (context, state) => const AiSimulationPage(),
+              path: '/simulation',
+              builder: (context, state) => const SimulationPage(),
             ),
           ],
         ),
@@ -147,6 +149,24 @@ final router = GoRouter(
       path: '/popular-feed',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const PopularFeedPage(),
+    ),
+    // Simulation routes
+    GoRoute(
+      path: '/simulation/team-select/:matchId',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final matchId = state.pathParameters['matchId']!;
+        return TeamSelectionPage(matchId: matchId);
+      },
+    ),
+    GoRoute(
+      path: '/simulation/match/:matchId',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final matchId = state.pathParameters['matchId']!;
+        final userTeamId = state.uri.queryParameters['team'] ?? '';
+        return MatchSimulationScreen(matchId: matchId, userTeamId: userTeamId);
+      },
     ),
   ],
 );

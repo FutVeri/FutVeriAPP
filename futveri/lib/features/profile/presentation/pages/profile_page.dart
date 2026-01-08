@@ -7,6 +7,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:futveri/core/theme/app_theme.dart';
 import 'package:futveri/features/profile/presentation/widgets/profile_list_item.dart';
 import 'package:futveri/features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import 'package:futveri/features/home/data/league_models.dart';
+import 'package:futveri/features/home/data/league_mock_data.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -198,7 +200,84 @@ class ProfilePage extends ConsumerWidget {
             ),
           ),
         ),
+        // League badges section
+        Gap(16.h),
+        _buildLeagueBadgesSection(),
       ],
+    );
+  }
+
+  Widget _buildLeagueBadgesSection() {
+    final badges = getMockUserBadges('current_user');
+    
+    if (badges.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        Text(
+          'Lig Rozetleri',
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textGrey,
+          ),
+        ),
+        Gap(8.h),
+        SizedBox(
+          height: 60.h,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            itemCount: badges.length,
+            separatorBuilder: (context, index) => Gap(8.w),
+            itemBuilder: (context, index) {
+              return _buildBadgeItem(badges[index]);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBadgeItem(LeagueBadge badge) {
+    final colors = {
+      LeagueBadgeType.gold: const Color(0xFFFFD700),
+      LeagueBadgeType.silver: const Color(0xFFC0C0C0),
+      LeagueBadgeType.bronze: const Color(0xFFCD7F32),
+    };
+    final color = colors[badge.type]!;
+
+    return Tooltip(
+      message: '${badge.leaguePeriod} - ${badge.type.displayName}',
+      child: Container(
+        width: 50.w,
+        height: 60.h,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.4)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              badge.type.emoji,
+              style: TextStyle(fontSize: 22.sp),
+            ),
+            Gap(2.h),
+            Text(
+              badge.type.displayName,
+              style: TextStyle(
+                fontSize: 8.sp,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
