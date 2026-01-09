@@ -11,6 +11,8 @@ from app.api.v1.reports import router as reports_router
 from app.api.v1.teams import router as teams_router
 from app.api.v1.users import router as users_router
 from app.api.v1.ai import router as ai_router
+from app.api.v1.fixtures import router as fixtures_router
+from app.api.v1.simulation import router as simulation_router
 
 api_router = APIRouter()
 
@@ -23,3 +25,6 @@ api_router.include_router(teams_router)
 api_router.include_router(posts_router)
 api_router.include_router(dashboard_router)
 api_router.include_router(ai_router)
+api_router.include_router(fixtures_router)
+api_router.include_router(simulation_router)
+
