@@ -20,7 +20,7 @@ class CreateReportPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Scout Report'),
+        title: Text(state.editingReportId != null ? 'Raporu Düzenle' : 'Yeni Rapor'),
         leading: IconButton(
           icon: const Icon(LucideIcons.chevronLeft),
           onPressed: () => context.pop(),
@@ -46,6 +46,7 @@ class CreateReportPage extends ConsumerWidget {
               hint: 'Search or enter player name',
               icon: LucideIcons.user,
               onChanged: viewModel.updatePlayerName,
+              initialValue: state.playerName.isNotEmpty ? state.playerName : null,
             ),
             Gap(12.h),
             Row(
@@ -55,7 +56,8 @@ class CreateReportPage extends ConsumerWidget {
                     label: 'Position',
                     hint: 'e.g. ST',
                     icon: LucideIcons.shirt,
-                    onChanged: viewModel.updatePlayerPosition, 
+                    onChanged: viewModel.updatePlayerPosition,
+                    initialValue: state.playerPosition.isNotEmpty ? state.playerPosition : null,
                   ),
                 ),
                 Gap(12.w),
@@ -68,6 +70,7 @@ class CreateReportPage extends ConsumerWidget {
                       final age = int.tryParse(val);
                       if (age != null) viewModel.updatePlayerAge(age);
                     },
+                    initialValue: state.playerAge > 0 ? state.playerAge.toString() : null,
                   ),
                 ),
               ],
@@ -78,6 +81,7 @@ class CreateReportPage extends ConsumerWidget {
               hint: 'e.g. Galatasaray',
               icon: LucideIcons.shield,
               onChanged: viewModel.updatePlayerTeam,
+              initialValue: state.playerTeam.isNotEmpty ? state.playerTeam : null,
             ),
             
             Gap(24.h),
@@ -88,6 +92,7 @@ class CreateReportPage extends ConsumerWidget {
               hint: 'Opponent Name',
               icon: LucideIcons.swords,
               onChanged: viewModel.updateRivalTeam,
+              initialValue: state.rivalTeam.isNotEmpty ? state.rivalTeam : null,
             ),
             
             Gap(24.h),
@@ -217,7 +222,7 @@ class CreateReportPage extends ConsumerWidget {
                 ),
                 child: state.isSubmitting
                     ? const CircularProgressIndicator(color: Colors.black)
-                    : const Text('Submit Report'),
+                    : Text(state.editingReportId != null ? 'Raporu Güncelle' : 'Rapor Gönder'),
               ),
             ),
             Gap(40.h),
@@ -244,6 +249,7 @@ class CreateReportPage extends ConsumerWidget {
     required String hint,
     required IconData icon,
     required Function(String) onChanged,
+    String? initialValue,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +263,8 @@ class CreateReportPage extends ConsumerWidget {
           ),
         ),
         Gap(8.h),
-        TextField(
+        TextFormField(
+          initialValue: initialValue,
           onChanged: onChanged,
           style: TextStyle(color: Colors.white, fontSize: 16.sp),
           decoration: InputDecoration(
@@ -486,7 +493,8 @@ class CreateReportPage extends ConsumerWidget {
             ),
           ),
           Gap(8.h),
-          TextField(
+          TextFormField(
+            initialValue: description.isNotEmpty ? description : null,
             onChanged: onDescriptionChanged,
             maxLines: 3,
             style: TextStyle(color: Colors.white, fontSize: 14.sp),

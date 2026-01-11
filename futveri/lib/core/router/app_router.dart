@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:futveri/features/scout/presentation/pages/create_report_page.dart';
 import 'package:futveri/features/scout/presentation/pages/report_detail_page.dart';
-import 'package:futveri/features/social/presentation/pages/social_feed_page.dart';
 import 'package:futveri/features/social/presentation/pages/post_detail_page.dart';
 import 'package:futveri/features/auth/presentation/pages/login_page.dart';
 import 'package:futveri/features/scout/presentation/pages/scout_dashboard_page.dart';
+import 'package:futveri/features/scout/presentation/pages/player_search_page.dart';
+import 'package:futveri/features/scout/presentation/pages/create_analysis_page.dart';
 import 'package:futveri/features/profile/presentation/pages/profile_page.dart';
+import 'package:futveri/features/splash/presentation/pages/splash_screen.dart';
 import '../../features/profile/presentation/pages/personal_info_page.dart';
 import '../../features/profile/presentation/pages/notifications_page.dart';
 import '../../features/profile/presentation/pages/security_page.dart';
@@ -16,6 +18,7 @@ import '../../features/profile/presentation/pages/feature_access_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/home/presentation/widgets/home_modules.dart';
 import '../../features/simulation/presentation/pages/simulation_page.dart';
+import '../../features/simulation/presentation/pages/simulation_welcome_page.dart';
 import '../../features/simulation/presentation/pages/team_selection_page.dart';
 import '../../features/simulation/presentation/pages/match_simulation_screen.dart';
 import '../widgets/scaffold_with_navbar.dart';
@@ -28,9 +31,15 @@ final _shellNavigatorLeaderboardKey = GlobalKey<NavigatorState>(debugLabel: 'she
 final _shellNavigatorProfileKey = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
 final router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   navigatorKey: _rootNavigatorKey,
   routes: [
+    // Splash Screen Route
+    GoRoute(
+      path: '/splash',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const SplashScreen(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return ScaffoldWithNavBar(navigationShell: navigationShell);
@@ -52,7 +61,20 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/scout',
+              name: 'scout',
               builder: (context, state) => const ScoutDashboardPage(),
+              routes: [
+                GoRoute(
+                  path: 'player-search',
+                  name: 'player-search',
+                  builder: (context, state) => const PlayerSearchPage(),
+                ),
+                GoRoute(
+                  path: 'create-analysis',
+                  name: 'create-analysis',
+                  builder: (context, state) => const CreateAnalysisPage(),
+                ),
+              ],
             ),
           ],
         ),
@@ -62,7 +84,15 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/simulation',
-              builder: (context, state) => const SimulationPage(),
+              name: 'simulation-welcome',
+              builder: (context, state) => const SimulationWelcomePage(),
+              routes: [
+                GoRoute(
+                  path: 'weekly',
+                  name: 'simulation-weekly',
+                  builder: (context, state) => const SimulationPage(),
+                ),
+              ],
             ),
           ],
         ),

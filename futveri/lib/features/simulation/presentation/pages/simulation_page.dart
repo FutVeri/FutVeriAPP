@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -7,12 +8,15 @@ import 'package:futveri/core/theme/app_theme.dart';
 import 'package:futveri/features/simulation/domain/models/weekly_matches_mock.dart';
 import 'package:futveri/features/simulation/domain/models/match_simulation_models.dart';
 
-class SimulationPage extends StatelessWidget {
+import 'package:futveri/features/simulation/presentation/viewmodels/simulation_viewmodel.dart';
+
+class SimulationPage extends ConsumerWidget {
   const SimulationPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final matches = WeeklyMatchesMock.getThisWeekMatches();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedWeek = ref.watch(selectedWeekProvider);
+    final matches = WeeklyMatchesMock.getMatchesForWeek(selectedWeek);
 
     return Scaffold(
       appBar: AppBar(
@@ -29,12 +33,12 @@ class SimulationPage extends StatelessWidget {
             Gap(24.h),
             
             // Week selector
-            _buildWeekSelector(),
+            _buildWeekSelector(ref, selectedWeek),
             Gap(20.h),
             
             // Matches list
             Text(
-              "Bu Hafta'nın Maçları",
+              "$selectedWeek. Hafta'nın Maçları",
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
@@ -104,7 +108,7 @@ class SimulationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildWeekSelector() {
+  Widget _buildWeekSelector(WidgetRef ref, int selectedWeek) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -115,11 +119,16 @@ class SimulationPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(LucideIcons.chevronLeft, color: AppTheme.textGrey),
+          IconButton(
+            icon: Icon(LucideIcons.chevronLeft, color: selectedWeek > 1 ? Colors.white : AppTheme.textGrey),
+            onPressed: selectedWeek > 1 
+              ? () => ref.read(selectedWeekProvider.notifier).decrement()
+              : null,
+          ),
           Column(
             children: [
               Text(
-                '18. Hafta',
+                '$selectedWeek. Hafta',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -135,7 +144,12 @@ class SimulationPage extends StatelessWidget {
               ),
             ],
           ),
-          Icon(LucideIcons.chevronRight, color: AppTheme.textGrey),
+          IconButton(
+            icon: Icon(LucideIcons.chevronRight, color: selectedWeek < 34 ? Colors.white : AppTheme.textGrey),
+            onPressed: selectedWeek < 34
+              ? () => ref.read(selectedWeekProvider.notifier).increment()
+              : null,
+          ),
         ],
       ),
     );

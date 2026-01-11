@@ -7,67 +7,125 @@ import 'match_simulation_models.dart';
 
 /// Generate weekly match fixtures
 class WeeklyMatchesMock {
-  /// Get this week's matches
+  /// Get this week's matches (defaults to 18)
   static List<WeeklyMatch> getThisWeekMatches() {
+    return getMatchesForWeek(18);
+  }
+
+  /// Get matches for a specific week (1-34)
+  static List<WeeklyMatch> getMatchesForWeek(int week) {
     final now = DateTime.now();
-    final saturday = now.add(Duration(days: (6 - now.weekday) % 7));
+    // Offset based on week number to make matches appear on different dates
+    final baseDate = now.add(Duration(days: (week - 18) * 7));
+    final saturday = baseDate.add(Duration(days: (6 - baseDate.weekday) % 7));
     final sunday = saturday.add(const Duration(days: 1));
 
-    return [
-      WeeklyMatch(
-        id: 'match_1',
-        homeTeam: MockSimulationData.galatasaray,
-        awayTeam: MockSimulationData.fenerbahce,
-        matchDateTime: DateTime(saturday.year, saturday.month, saturday.day, 19, 0),
-        stadium: 'Rams Park',
-        matchweek: 18,
-      ),
-      WeeklyMatch(
-        id: 'match_2',
-        homeTeam: MockSimulationData.besiktas,
-        awayTeam: MockSimulationData.trabzonspor,
-        matchDateTime: DateTime(saturday.year, saturday.month, saturday.day, 16, 0),
-        stadium: 'Tüpraş Stadyumu',
-        matchweek: 18,
-      ),
-      WeeklyMatch(
-        id: 'match_3',
-        homeTeam: MockSimulationData.trabzonspor,
-        awayTeam: MockSimulationData.galatasaray,
-        matchDateTime: DateTime(sunday.year, sunday.month, sunday.day, 19, 0),
-        stadium: 'Papara Park',
-        matchweek: 18,
-      ),
-      WeeklyMatch(
-        id: 'match_4',
-        homeTeam: MockSimulationData.fenerbahce,
-        awayTeam: MockSimulationData.besiktas,
-        matchDateTime: DateTime(sunday.year, sunday.month, sunday.day, 21, 0),
-        stadium: 'Ülker Stadyumu',
-        matchweek: 18,
-      ),
-    ];
+    // Simple rotation of matchups based on week to simulate a league
+    final rotation = week % 4;
+    
+    switch (rotation) {
+      case 0:
+        return [
+          WeeklyMatch(
+            id: 'match_${week}_1',
+            homeTeam: MockSimulationData.galatasaray,
+            awayTeam: MockSimulationData.fenerbahce,
+            matchDateTime: DateTime(saturday.year, saturday.month, saturday.day, 19, 0),
+            stadium: 'Rams Park',
+            matchweek: week,
+          ),
+          WeeklyMatch(
+            id: 'match_${week}_2',
+            homeTeam: MockSimulationData.besiktas,
+            awayTeam: MockSimulationData.trabzonspor,
+            matchDateTime: DateTime(saturday.year, saturday.month, saturday.day, 16, 0),
+            stadium: 'Tüpraş Stadyumu',
+            matchweek: week,
+          ),
+        ];
+      case 1:
+        return [
+          WeeklyMatch(
+            id: 'match_${week}_1',
+            homeTeam: MockSimulationData.trabzonspor,
+            awayTeam: MockSimulationData.galatasaray,
+            matchDateTime: DateTime(sunday.year, sunday.month, sunday.day, 19, 0),
+            stadium: 'Papara Park',
+            matchweek: week,
+          ),
+          WeeklyMatch(
+            id: 'match_${week}_2',
+            homeTeam: MockSimulationData.fenerbahce,
+            awayTeam: MockSimulationData.besiktas,
+            matchDateTime: DateTime(sunday.year, sunday.month, sunday.day, 21, 0),
+            stadium: 'Ülker Stadyumu',
+            matchweek: week,
+          ),
+        ];
+      case 2:
+        return [
+          WeeklyMatch(
+            id: 'match_${week}_1',
+            homeTeam: MockSimulationData.galatasaray,
+            awayTeam: MockSimulationData.besiktas,
+            matchDateTime: DateTime(saturday.year, saturday.month, saturday.day, 20, 0),
+            stadium: 'Rams Park',
+            matchweek: week,
+          ),
+          WeeklyMatch(
+            id: 'match_${week}_2',
+            homeTeam: MockSimulationData.fenerbahce,
+            awayTeam: MockSimulationData.trabzonspor,
+            matchDateTime: DateTime(sunday.year, sunday.month, sunday.day, 18, 0),
+            stadium: 'Ülker Stadyumu',
+            matchweek: week,
+          ),
+        ];
+      default:
+        return [
+          WeeklyMatch(
+            id: 'match_${week}_1',
+            homeTeam: MockSimulationData.besiktas,
+            awayTeam: MockSimulationData.fenerbahce,
+            matchDateTime: DateTime(saturday.year, saturday.month, saturday.day, 19, 0),
+            stadium: 'Tüpraş Stadyumu',
+            matchweek: week,
+          ),
+          WeeklyMatch(
+            id: 'match_${week}_2',
+            homeTeam: MockSimulationData.trabzonspor,
+            awayTeam: MockSimulationData.galatasaray,
+            matchDateTime: DateTime(sunday.year, sunday.month, sunday.day, 16, 0),
+            stadium: 'Papara Park',
+            matchweek: week,
+          ),
+        ];
+    }
   }
 
   /// Get initial player positions for a 4-3-3 formation (home team plays left to right)
   static List<PlayerPosition> getHomeFormationPositions(SimulationTeam team) {
     final players = team.players;
+    // We assume first 11 are starters
     return [
-      // GK
+      // GK (Line 1)
       PlayerPosition(playerId: players[0].id, playerName: players[0].name, shirtNumber: players[0].number, x: 5, y: 50, position: 'GK'),
-      // Defenders
-      PlayerPosition(playerId: '${team.id}_def1', playerName: 'Savunma 1', shirtNumber: 2, x: 20, y: 80, position: 'RB'),
-      PlayerPosition(playerId: '${team.id}_def2', playerName: 'Savunma 2', shirtNumber: 4, x: 20, y: 60, position: 'CB'),
-      PlayerPosition(playerId: players.length > 4 ? players[4].id : '${team.id}_def3', playerName: players.length > 4 ? players[4].name : 'Savunma 3', shirtNumber: players.length > 4 ? players[4].number : 5, x: 20, y: 40, position: 'CB'),
-      PlayerPosition(playerId: '${team.id}_def4', playerName: 'Savunma 4', shirtNumber: 3, x: 20, y: 20, position: 'LB'),
-      // Midfielders
-      PlayerPosition(playerId: players.length > 3 ? players[3].id : '${team.id}_mid1', playerName: players.length > 3 ? players[3].name : 'Orta Saha 1', shirtNumber: players.length > 3 ? players[3].number : 6, x: 40, y: 70, position: 'CM'),
-      PlayerPosition(playerId: '${team.id}_mid2', playerName: 'Orta Saha 2', shirtNumber: 8, x: 40, y: 50, position: 'CM'),
-      PlayerPosition(playerId: '${team.id}_mid3', playerName: 'Orta Saha 3', shirtNumber: 10, x: 40, y: 30, position: 'CM'),
-      // Forwards
-      PlayerPosition(playerId: '${team.id}_fw1', playerName: 'Forvet 1', shirtNumber: 7, x: 60, y: 75, position: 'RW'),
-      PlayerPosition(playerId: players.length > 1 ? players[1].id : '${team.id}_fw2', playerName: players.length > 1 ? players[1].name : 'Forvet 2', shirtNumber: players.length > 1 ? players[1].number : 9, x: 65, y: 50, hasBall: true, position: 'ST'),
-      PlayerPosition(playerId: '${team.id}_fw3', playerName: 'Forvet 3', shirtNumber: 11, x: 60, y: 25, position: 'LW'),
+      
+      // Defenders (Line 2)
+      PlayerPosition(playerId: players[8].id, playerName: players[8].name, shirtNumber: players[8].number, x: 20, y: 80, position: 'RB'),
+      PlayerPosition(playerId: players[4].id, playerName: players[4].name, shirtNumber: players[4].number, x: 20, y: 60, position: 'CB'),
+      PlayerPosition(playerId: players[5].id, playerName: players[5].name, shirtNumber: players[5].number, x: 20, y: 40, position: 'CB'),
+      PlayerPosition(playerId: players[9].id, playerName: players[9].name, shirtNumber: players[9].number, x: 20, y: 20, position: 'LB'),
+      
+      // Midfielders (Line 3)
+      PlayerPosition(playerId: players[3].id, playerName: players[3].name, shirtNumber: players[3].number, x: 40, y: 65, position: 'CDM'),
+      PlayerPosition(playerId: players[7].id, playerName: players[7].name, shirtNumber: players[7].number, x: 45, y: 45, position: 'CM'),
+      PlayerPosition(playerId: players[2].id, playerName: players[2].name, shirtNumber: players[2].number, x: 40, y: 25, position: 'CAM'),
+      
+      // Forwards (Line 4)
+      PlayerPosition(playerId: players[6].id, playerName: players[6].name, shirtNumber: players[6].number, x: 65, y: 80, position: 'RW'),
+      PlayerPosition(playerId: players[1].id, playerName: players[1].name, shirtNumber: players[1].number, x: 70, y: 50, hasBall: true, position: 'ST'),
+      PlayerPosition(playerId: players[10].id, playerName: players[10].name, shirtNumber: players[10].number, x: 65, y: 20, position: 'LW'),
     ];
   }
 
@@ -77,19 +135,22 @@ class WeeklyMatchesMock {
     return [
       // GK
       PlayerPosition(playerId: players[0].id, playerName: players[0].name, shirtNumber: players[0].number, x: 95, y: 50, position: 'GK'),
+      
       // Defenders
-      PlayerPosition(playerId: '${team.id}_def1', playerName: 'Savunma 1', shirtNumber: 2, x: 80, y: 20, position: 'RB'),
-      PlayerPosition(playerId: '${team.id}_def2', playerName: 'Savunma 2', shirtNumber: 4, x: 80, y: 40, position: 'CB'),
-      PlayerPosition(playerId: players.length > 4 ? players[4].id : '${team.id}_def3', playerName: players.length > 4 ? players[4].name : 'Savunma 3', shirtNumber: players.length > 4 ? players[4].number : 5, x: 80, y: 60, position: 'CB'),
-      PlayerPosition(playerId: '${team.id}_def4', playerName: 'Savunma 4', shirtNumber: 3, x: 80, y: 80, position: 'LB'),
+      PlayerPosition(playerId: players[8].id, playerName: players[8].name, shirtNumber: players[8].number, x: 80, y: 20, position: 'RB'),
+      PlayerPosition(playerId: players[4].id, playerName: players[4].name, shirtNumber: players[4].number, x: 80, y: 40, position: 'CB'),
+      PlayerPosition(playerId: players[5].id, playerName: players[5].name, shirtNumber: players[5].number, x: 80, y: 60, position: 'CB'),
+      PlayerPosition(playerId: players[9].id, playerName: players[9].name, shirtNumber: players[9].number, x: 80, y: 80, position: 'LB'),
+      
       // Midfielders
-      PlayerPosition(playerId: players.length > 3 ? players[3].id : '${team.id}_mid1', playerName: players.length > 3 ? players[3].name : 'Orta Saha 1', shirtNumber: players.length > 3 ? players[3].number : 6, x: 60, y: 30, position: 'CM'),
-      PlayerPosition(playerId: '${team.id}_mid2', playerName: 'Orta Saha 2', shirtNumber: 8, x: 60, y: 50, position: 'CM'),
-      PlayerPosition(playerId: '${team.id}_mid3', playerName: 'Orta Saha 3', shirtNumber: 10, x: 60, y: 70, position: 'CM'),
+      PlayerPosition(playerId: players[3].id, playerName: players[3].name, shirtNumber: players[3].number, x: 60, y: 35, position: 'CDM'),
+      PlayerPosition(playerId: players[7].id, playerName: players[7].name, shirtNumber: players[7].number, x: 55, y: 55, position: 'CM'),
+      PlayerPosition(playerId: players[2].id, playerName: players[2].name, shirtNumber: players[2].number, x: 60, y: 75, position: 'CAM'),
+      
       // Forwards
-      PlayerPosition(playerId: '${team.id}_fw1', playerName: 'Forvet 1', shirtNumber: 7, x: 40, y: 25, position: 'RW'),
-      PlayerPosition(playerId: players.length > 1 ? players[1].id : '${team.id}_fw2', playerName: players.length > 1 ? players[1].name : 'Forvet 2', shirtNumber: players.length > 1 ? players[1].number : 9, x: 35, y: 50, position: 'ST'),
-      PlayerPosition(playerId: '${team.id}_fw3', playerName: 'Forvet 3', shirtNumber: 11, x: 40, y: 75, position: 'LW'),
+      PlayerPosition(playerId: players[6].id, playerName: players[6].name, shirtNumber: players[6].number, x: 35, y: 20, position: 'RW'),
+      PlayerPosition(playerId: players[1].id, playerName: players[1].name, shirtNumber: players[1].number, x: 30, y: 50, position: 'ST'),
+      PlayerPosition(playerId: players[10].id, playerName: players[10].name, shirtNumber: players[10].number, x: 35, y: 80, position: 'LW'),
     ];
   }
 }

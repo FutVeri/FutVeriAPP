@@ -446,11 +446,11 @@ class _MatchSimulationScreenState extends State<MatchSimulationScreen> {
           
           // Fast forward
           _buildControlButton(
-            icon: LucideIcons.fastForward,
-            label: 'Hızlı',
-            color: Colors.blue,
-            enabled: false, // Future feature
-            onTap: () {},
+            icon: state.speedMultiplier == 1 ? LucideIcons.fastForward : LucideIcons.chevronsRight,
+            label: '${state.speedMultiplier}x Hız',
+            color: state.speedMultiplier == 1 ? Colors.blue : Colors.purple,
+            enabled: true,
+            onTap: () => _engine.toggleSpeed(),
           ),
         ],
       ),
