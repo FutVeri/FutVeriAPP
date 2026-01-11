@@ -130,10 +130,19 @@ class MatchState {
   final List<MatchEvent> events;
   final List<PlayerPosition> homePositions;
   final List<PlayerPosition> awayPositions;
+  final List<SimulationPlayer>? _homeBench;
+  final List<SimulationPlayer>? _awayBench;
+  
+  List<SimulationPlayer> get homeBench => _homeBench ?? const [];
+  List<SimulationPlayer> get awayBench => _awayBench ?? const [];
+
   final bool isPlaying;
   final bool isHalfTime;
   final bool isFullTime;
   final String? currentTactic; // defensive, balanced, attacking
+  final int? _speedMultiplier;
+
+  int get speedMultiplier => _speedMultiplier ?? 1;
 
   const MatchState({
     required this.matchId,
@@ -159,11 +168,14 @@ class MatchState {
     this.events = const [],
     this.homePositions = const [],
     this.awayPositions = const [],
+    List<SimulationPlayer>? homeBench,
+    List<SimulationPlayer>? awayBench,
     this.isPlaying = false,
     this.isHalfTime = false,
     this.isFullTime = false,
     this.currentTactic = 'balanced',
-  });
+    int? speedMultiplier = 1,
+  }) : _homeBench = homeBench, _awayBench = awayBench, _speedMultiplier = speedMultiplier;
 
   MatchState copyWith({
     int? minute,
@@ -185,10 +197,13 @@ class MatchState {
     List<MatchEvent>? events,
     List<PlayerPosition>? homePositions,
     List<PlayerPosition>? awayPositions,
+    List<SimulationPlayer>? homeBench,
+    List<SimulationPlayer>? awayBench,
     bool? isPlaying,
     bool? isHalfTime,
     bool? isFullTime,
     String? currentTactic,
+    int? speedMultiplier,
   }) {
     return MatchState(
       matchId: matchId,
@@ -214,10 +229,13 @@ class MatchState {
       events: events ?? this.events,
       homePositions: homePositions ?? this.homePositions,
       awayPositions: awayPositions ?? this.awayPositions,
+      homeBench: homeBench ?? this.homeBench,
+      awayBench: awayBench ?? this.awayBench,
       isPlaying: isPlaying ?? this.isPlaying,
       isHalfTime: isHalfTime ?? this.isHalfTime,
       isFullTime: isFullTime ?? this.isFullTime,
       currentTactic: currentTactic ?? this.currentTactic,
+      speedMultiplier: speedMultiplier ?? this.speedMultiplier,
     );
   }
 }

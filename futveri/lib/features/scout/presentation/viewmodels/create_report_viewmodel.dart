@@ -288,73 +288,117 @@ class CreateReportViewModel extends Notifier<CreateReportState> {
     state = state.copyWith(isSubmitting: true, clearError: true);
     
     try {
-      final reportId = const Uuid().v4();
+      final isEditing = state.editingReportId != null;
       
-      print('📋 Creating report: $reportId');
-      print('📋 Scout ID: ${currentUser.id}');
-      
-      // Create report data matching backend scout_reports table EXACTLY
-      final reportData = {
-        'id': reportId,
-        'scout_id': currentUser.id,
-        
-        // Player Information (NOT NULL)
-        'player_name': state.playerName,
-        'player_position': state.playerPosition,
-        'player_age': state.playerAge,
-        'player_team': state.playerTeam,
-        
-        // Match Context (NOT NULL)
-        'match_date': state.matchDate.toIso8601String(),
-        'rival_team': state.rivalTeam,
-        'score': state.score,
-        'minute_played': state.minutePlayed,
-        'match_type': state.matchType,
-        
-        // Ratings (NOT NULL)
-        'physical_rating': state.physicalRating,
-        'physical_description': state.physicalDescription.isEmpty ? '-' : state.physicalDescription,
-        'technical_rating': state.technicalRating,
-        'technical_description': state.technicalDescription.isEmpty ? '-' : state.technicalDescription,
-        'tactical_rating': state.tacticalRating,
-        'tactical_description': state.tacticalDescription.isEmpty ? '-' : state.tacticalDescription,
-        'mental_rating': state.mentalRating,
-        'mental_description': state.mentalDescription.isEmpty ? '-' : state.mentalDescription,
-        'overall_rating': state.overallRating,
-        'potential_rating': state.potentialRating,
-        
-        // SWOT (NOT NULL)
-        'strengths': state.strengths.isEmpty ? '-' : state.strengths,
-        'weaknesses': state.weaknesses.isEmpty ? '-' : state.weaknesses,
-        'risks': state.risks.isEmpty ? '-' : state.risks,
-        'recommended_role': state.recommendedRole.isEmpty ? '-' : state.recommendedRole,
-        
-        // Optional
-        'description': state.description.isEmpty ? null : state.description,
-        'notes': state.notes.isEmpty ? null : state.notes,
-        'image_urls': state.imageUrls.isEmpty ? null : state.imageUrls,
-        
-        // Status
-        'status': 'submitted',
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
-      };
-      
-      print('📋 Report data prepared, submitting...');
-      
-      if (state.editingReportId != null) {
+      if (isEditing) {
+        // UPDATE: Only send modifiable fields (no id, scout_id, created_at)
         print('📋 Updating existing report: ${state.editingReportId}');
+        
+        final updateData = {
+          // Player Information
+          'player_name': state.playerName,
+          'player_position': state.playerPosition,
+          'player_age': state.playerAge,
+          'player_team': state.playerTeam,
+          
+          // Match Context
+          'match_date': state.matchDate.toIso8601String(),
+          'rival_team': state.rivalTeam,
+          'score': state.score,
+          'minute_played': state.minutePlayed,
+          'match_type': state.matchType,
+          
+          // Ratings
+          'physical_rating': state.physicalRating,
+          'physical_description': state.physicalDescription.isEmpty ? '-' : state.physicalDescription,
+          'technical_rating': state.technicalRating,
+          'technical_description': state.technicalDescription.isEmpty ? '-' : state.technicalDescription,
+          'tactical_rating': state.tacticalRating,
+          'tactical_description': state.tacticalDescription.isEmpty ? '-' : state.tacticalDescription,
+          'mental_rating': state.mentalRating,
+          'mental_description': state.mentalDescription.isEmpty ? '-' : state.mentalDescription,
+          'overall_rating': state.overallRating,
+          'potential_rating': state.potentialRating,
+          
+          // SWOT
+          'strengths': state.strengths.isEmpty ? '-' : state.strengths,
+          'weaknesses': state.weaknesses.isEmpty ? '-' : state.weaknesses,
+          'risks': state.risks.isEmpty ? '-' : state.risks,
+          'recommended_role': state.recommendedRole.isEmpty ? '-' : state.recommendedRole,
+          
+          // Optional
+          'description': state.description.isEmpty ? null : state.description,
+          'notes': state.notes.isEmpty ? null : state.notes,
+          'image_urls': state.imageUrls.isEmpty ? null : state.imageUrls,
+          
+          // Only update timestamp
+          'updated_at': DateTime.now().toIso8601String(),
+        };
+        
         await supabase.client
             .from('scout_reports')
-            .update(reportData)
+            .update(updateData)
             .eq('id', state.editingReportId!);
+        
+        state = state.copyWith(isSubmitting: false);
+        return state.editingReportId;
       } else {
-        print('📋 Inserting new report: $reportId');
-        await supabase.client.from('scout_reports').insert(reportData);
+        // INSERT: Create new report with all fields
+        final reportId = const Uuid().v4();
+        print('📋 Creating new report: $reportId');
+        print('📋 Scout ID: ${currentUser.id}');
+        
+        final insertData = {
+          'id': reportId,
+          'scout_id': currentUser.id,
+          
+          // Player Information
+          'player_name': state.playerName,
+          'player_position': state.playerPosition,
+          'player_age': state.playerAge,
+          'player_team': state.playerTeam,
+          
+          // Match Context
+          'match_date': state.matchDate.toIso8601String(),
+          'rival_team': state.rivalTeam,
+          'score': state.score,
+          'minute_played': state.minutePlayed,
+          'match_type': state.matchType,
+          
+          // Ratings
+          'physical_rating': state.physicalRating,
+          'physical_description': state.physicalDescription.isEmpty ? '-' : state.physicalDescription,
+          'technical_rating': state.technicalRating,
+          'technical_description': state.technicalDescription.isEmpty ? '-' : state.technicalDescription,
+          'tactical_rating': state.tacticalRating,
+          'tactical_description': state.tacticalDescription.isEmpty ? '-' : state.tacticalDescription,
+          'mental_rating': state.mentalRating,
+          'mental_description': state.mentalDescription.isEmpty ? '-' : state.mentalDescription,
+          'overall_rating': state.overallRating,
+          'potential_rating': state.potentialRating,
+          
+          // SWOT
+          'strengths': state.strengths.isEmpty ? '-' : state.strengths,
+          'weaknesses': state.weaknesses.isEmpty ? '-' : state.weaknesses,
+          'risks': state.risks.isEmpty ? '-' : state.risks,
+          'recommended_role': state.recommendedRole.isEmpty ? '-' : state.recommendedRole,
+          
+          // Optional
+          'description': state.description.isEmpty ? null : state.description,
+          'notes': state.notes.isEmpty ? null : state.notes,
+          'image_urls': state.imageUrls.isEmpty ? null : state.imageUrls,
+          
+          // Status & Timestamps
+          'status': 'submitted',
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        };
+        
+        await supabase.client.from('scout_reports').insert(insertData);
+        
+        state = state.copyWith(isSubmitting: false);
+        return reportId;
       }
-      
-      state = state.copyWith(isSubmitting: false);
-      return state.editingReportId ?? reportId;
     } catch (e) {
       state = state.copyWith(
         isSubmitting: false,

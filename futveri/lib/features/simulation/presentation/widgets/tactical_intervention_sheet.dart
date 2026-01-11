@@ -22,6 +22,8 @@ class TacticalInterventionSheet extends StatefulWidget {
 class _TacticalInterventionSheetState extends State<TacticalInterventionSheet> {
   String? selectedMentality;
   String? selectedFormation;
+  String? selectedPlayerOutId;
+  String? selectedPlayerInId;
 
   @override
   void initState() {
@@ -31,6 +33,10 @@ class _TacticalInterventionSheetState extends State<TacticalInterventionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isHomeTeam = widget.state.userTeamId == widget.state.homeTeam.id;
+    final onFieldPlayers = isHomeTeam ? widget.state.homePositions : widget.state.awayPositions;
+    final benchPlayers = isHomeTeam ? widget.state.homeBench : widget.state.awayBench;
+
     return Container(
       padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
@@ -97,9 +103,9 @@ class _TacticalInterventionSheetState extends State<TacticalInterventionSheet> {
           ),
           Gap(24.h),
           
-          // Formation section
+          // Substitution section
           Text(
-            'Formasyon',
+            'Oyuncu Değişikliği',
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.bold,
@@ -107,101 +113,91 @@ class _TacticalInterventionSheetState extends State<TacticalInterventionSheet> {
             ),
           ),
           Gap(12.h),
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildFormationChip('4-4-2'),
-              _buildFormationChip('4-3-3'),
-              _buildFormationChip('4-2-3-1'),
-              _buildFormationChip('3-5-2'),
-              _buildFormationChip('5-3-2'),
-            ],
-          ),
-          Gap(24.h),
-          
-          // Substitution placeholder
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-            ),
-            child: Row(
-              children: [
-                Icon(LucideIcons.userMinus, color: AppTheme.textGrey, size: 20.sp),
-                Gap(12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Oyuncu Değişikliği',
-                        style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+              // Players on field
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Çıkan Oyuncu', style: TextStyle(fontSize: 11.sp, color: AppTheme.textGrey)),
+                    Gap(8.h),
+                    Container(
+                      height: 150.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      Text(
-                        'Yakında eklenecek',
-                        style: TextStyle(color: AppTheme.textGrey, fontSize: 11.sp),
+                      child: ListView.builder(
+                        itemCount: onFieldPlayers.length,
+                        itemBuilder: (context, index) {
+                          final player = onFieldPlayers[index];
+                          final isSelected = selectedPlayerOutId == player.playerId;
+                          return ListTile(
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
+                            title: Text(
+                              player.playerName,
+                              style: TextStyle(
+                                fontSize: 11.sp, 
+                                color: isSelected ? Colors.red : Colors.white70,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                            subtitle: Text(player.position, style: TextStyle(fontSize: 9.sp, color: AppTheme.textGrey)),
+                            trailing: Text('#${player.shirtNumber}', style: TextStyle(fontSize: 10.sp, color: AppTheme.textGrey)),
+                            onTap: () => setState(() => selectedPlayerOutId = player.playerId),
+                          );
+                        },
                       ),
-                    ],
-                  ),
-                ),
-                Icon(LucideIcons.lock, color: AppTheme.textGrey, size: 16.sp),
-              ],
-            ),
-          ),
-          Gap(16.h),
-          
-          // LLM AI Coach placeholder
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFF6366F1).withOpacity(0.1),
-                  const Color(0xFF8B5CF6).withOpacity(0.05),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(LucideIcons.bot, color: const Color(0xFF6366F1), size: 20.sp),
-                Gap(12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'AI Koç Önerisi',
-                        style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-                      ),
-                      Text(
-                        'LLM entegrasyonu ile taktik öneriler',
-                        style: TextStyle(color: AppTheme.textGrey, fontSize: 11.sp),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF6366F1).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'YAKINDA',
-                    style: TextStyle(
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF6366F1),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Gap(12.w),
+              // Bench players
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Giren Oyuncu', style: TextStyle(fontSize: 11.sp, color: AppTheme.textGrey)),
+                    Gap(8.h),
+                    Container(
+                      height: 150.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: benchPlayers.isEmpty 
+                        ? Center(child: Text('Yedek yok', style: TextStyle(fontSize: 10.sp, color: AppTheme.textGrey)))
+                        : ListView.builder(
+                            itemCount: benchPlayers.length,
+                            itemBuilder: (context, index) {
+                              final player = benchPlayers[index];
+                              final isSelected = selectedPlayerInId == player.id;
+                              return ListTile(
+                                dense: true,
+                                visualDensity: VisualDensity.compact,
+                                title: Text(
+                                  player.name,
+                                  style: TextStyle(
+                                    fontSize: 11.sp, 
+                                    color: isSelected ? AppTheme.primaryGreen : Colors.white70,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                                subtitle: Text(player.position, style: TextStyle(fontSize: 9.sp, color: AppTheme.textGrey)),
+                                trailing: Text('#${player.number}', style: TextStyle(fontSize: 10.sp, color: AppTheme.textGrey)),
+                                onTap: () => setState(() => selectedPlayerInId = player.id),
+                              );
+                            },
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           Gap(24.h),
           
@@ -210,17 +206,26 @@ class _TacticalInterventionSheetState extends State<TacticalInterventionSheet> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
+                // Handle mentality change first if any
                 if (selectedMentality != null && selectedMentality != widget.state.currentTactic) {
                   widget.onIntervention(TacticalIntervention(
                     type: 'mentality',
                     mentality: selectedMentality,
                   ));
-                } else if (selectedFormation != null) {
+                }
+                
+                // Handle substitution
+                if (selectedPlayerOutId != null && selectedPlayerInId != null) {
                   widget.onIntervention(TacticalIntervention(
-                    type: 'formation',
-                    newFormation: selectedFormation,
+                    type: 'substitution',
+                    playerOutId: selectedPlayerOutId,
+                    playerInId: selectedPlayerInId,
                   ));
-                } else {
+                }
+                
+                // Close if something was selected or just to close
+                if ((selectedMentality == widget.state.currentTactic || selectedMentality == null) && 
+                    (selectedPlayerOutId == null || selectedPlayerInId == null)) {
                   Navigator.pop(context);
                 }
               },
@@ -275,32 +280,6 @@ class _TacticalInterventionSheetState extends State<TacticalInterventionSheet> {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFormationChip(String formation) {
-    final isSelected = selectedFormation == formation;
-    
-    return GestureDetector(
-      onTap: () => setState(() => selectedFormation = formation),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryGreen.withOpacity(0.2) : Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? AppTheme.primaryGreen : Colors.white.withOpacity(0.1),
-          ),
-        ),
-        child: Text(
-          formation,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: isSelected ? AppTheme.primaryGreen : Colors.white70,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ),

@@ -23,14 +23,13 @@ class ScoutDashboardPage extends ConsumerWidget {
           IconButton(
             icon: const Icon(LucideIcons.search),
             onPressed: () {
-              // Search reports
+              context.push('/scout/player-search');
             },
           ),
           IconButton(
             icon: const Icon(LucideIcons.plusCircle),
             onPressed: () {
-              ref.read(createReportProvider.notifier).reset();
-              context.push('/create-report');
+              context.push('/scout/create-analysis');
             },
           ),
         ],

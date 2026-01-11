@@ -30,6 +30,8 @@ class MatchEngine extends ChangeNotifier {
       minute: 0,
       homePositions: WeeklyMatchesMock.getHomeFormationPositions(match.homeTeam),
       awayPositions: WeeklyMatchesMock.getAwayFormationPositions(match.awayTeam),
+      homeBench: match.homeTeam.players.length > 11 ? match.homeTeam.players.skip(11).toList() : [],
+      awayBench: match.awayTeam.players.length > 11 ? match.awayTeam.players.skip(11).toList() : [],
       isPlaying: false,
     );
     notifyListeners();
@@ -46,9 +48,35 @@ class MatchEngine extends ChangeNotifier {
       _addEvent(MatchEventType.kickoff, _state!.homeTeam.id, 'Maç başladı!');
     }
     
-    // 1 second = 1 minute of match time
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    // Duration depends on speed multiplier
+    // 1x: 1000ms, 2x: 500ms, 5x: 200ms
+    final milliseconds = (1000 / _state!.speedMultiplier).round();
+    _timer?.cancel();
+    _timer = Timer.periodic(Duration(milliseconds: milliseconds), (_) => _tick());
     notifyListeners();
+  }
+  
+  /// Toggle match speed (1x -> 2x -> 5x -> 1x)
+  void toggleSpeed() {
+    if (_state == null) return;
+    
+    int newSpeed;
+    if (_state!.speedMultiplier == 1) {
+      newSpeed = 2;
+    } else if (_state!.speedMultiplier == 2) {
+      newSpeed = 5;
+    } else {
+      newSpeed = 1;
+    }
+    
+    _state = _state!.copyWith(speedMultiplier: newSpeed);
+    
+    // Restart timer with new speed if match is already running
+    if (isRunning) {
+      startMatch();
+    } else {
+      notifyListeners();
+    }
   }
   
   /// Pause the match
@@ -79,11 +107,49 @@ class MatchEngine extends ChangeNotifier {
         );
         break;
       case 'substitution':
-        _addEvent(
-          MatchEventType.substitution,
-          _state!.userTeamId,
-          'Oyuncu değişikliği yapıldı',
-        );
+        if (intervention.playerOutId == null || intervention.playerInId == null) return;
+        
+        final isHomeSub = _state!.userTeamId == _state!.homeTeam.id;
+        final positions = isHomeSub ? List<PlayerPosition>.from(_state!.homePositions) : List<PlayerPosition>.from(_state!.awayPositions);
+        final bench = isHomeSub ? List<SimulationPlayer>.from(_state!.homeBench) : List<SimulationPlayer>.from(_state!.awayBench);
+        
+        final outIndex = positions.indexWhere((p) => p.playerId == intervention.playerOutId);
+        final inIndex = bench.indexWhere((p) => p.id == intervention.playerInId);
+        
+        if (outIndex != -1 && inIndex != -1) {
+          final playerOut = positions[outIndex];
+          final playerIn = bench[inIndex];
+          
+          // Add event
+          _addEvent(
+            MatchEventType.substitution,
+            _state!.userTeamId,
+            'Oyuncu Değişikliği: ${playerOut.playerName} ↔ ${playerIn.name}',
+            playerId: playerIn.id,
+            playerName: playerIn.name,
+          );
+          
+          // Swap
+          positions[outIndex] = PlayerPosition(
+            playerId: playerIn.id,
+            playerName: playerIn.name,
+            shirtNumber: playerIn.number,
+            x: playerOut.x,
+            y: playerOut.y,
+            hasBall: playerOut.hasBall,
+            position: playerOut.position,
+          );
+          
+          bench.removeAt(inIndex);
+          // Optional: Add playerOut to bench if you want to allow re-substitution (usually not allowed in official matches but maybe in this app)
+          // For now, let's just remove the sub from bench.
+          
+          if (isHomeSub) {
+            _state = _state!.copyWith(homePositions: positions, homeBench: bench);
+          } else {
+            _state = _state!.copyWith(awayPositions: positions, awayBench: bench);
+          }
+        }
         break;
       case 'formation':
         _addEvent(
